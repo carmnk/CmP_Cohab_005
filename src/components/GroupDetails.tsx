@@ -1,82 +1,88 @@
-import { Flex, CTextField, Button } from "@cmk/fe_utils";
-import { Box, Typography, useTheme } from "@mui/material";
-import { useCallback, useState } from "react";
-import { Icon } from "@mdi/react";
-import { mdiCheckCircleOutline, mdiEmailFastOutline } from "@mdi/js";
-import { API } from "../api/API";
-import { formatUserName } from "../utils/formatUsername";
+import { Flex, CTextField, Button } from '@cmk/fe_utils'
+import { Box, Typography, useTheme } from '@mui/material'
+import { useCallback, useState } from 'react'
+import { Icon } from '@mdi/react'
+import { mdiCheckCircleOutline, mdiEmailFastOutline } from '@mdi/js'
+import { API } from '../api/API'
+import { formatUserName } from '../utils/formatUsername'
 
 export type GroupDetailsProps = {
-  data?: any;
-};
+  data?: any
+  updateUser?: () => Promise<void>
+}
 
 const invits = [
-  { id: "1", admin_user_id: "admin1@cohab.eu", invitee_email: "a@a.aa" },
-  { id: "2", admin_user_id: "admin1@cohab.au", invitee_email: "b@b.bb" },
-];
+  { id: '1', admin_user_id: 'admin1@cohab.eu', invitee_email: 'a@a.aa' },
+  { id: '2', admin_user_id: 'admin1@cohab.au', invitee_email: 'b@b.bb' },
+]
 const sentInvits = [
-  { id: "1", admin_user_id: "admin1@cohab.eu", invitee_email: "a@a.aa" },
-  { id: "2", admin_user_id: "admin1@cohab.au", invitee_email: "b@b.bb" },
-];
+  { id: '1', admin_user_id: 'admin1@cohab.eu', invitee_email: 'a@a.aa' },
+  { id: '2', admin_user_id: 'admin1@cohab.au', invitee_email: 'b@b.bb' },
+]
 
 export const GroupDetails = (props: GroupDetailsProps) => {
-  const { data } = props;
+  const { data, updateUser } = props
 
-  const [formData, setFormData] = useState({ email: "" });
+  const [formData, setFormData] = useState({ email: '' })
   const handleChange = (newValue: string, e) => {
-    console.log("handleChange", newValue, e);
+    console.log('handleChange', newValue, e)
     setFormData({
       ...formData,
       [e.target.name]: newValue,
-    });
-  };
+    })
+  }
 
-  const theme = useTheme();
+  const theme = useTheme()
 
   const inviteUser = useCallback(async () => {
     if (!formData.email) {
-      alert("Please enter an email address");
-      return;
+      alert('Please enter an email address')
+      return
     }
-    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!regexEmail.test(formData.email)) {
-      alert("Please enter a valid email address");
-      return;
+      alert('Please enter a valid email address')
+      return
     }
     try {
       const resInvite = await API.sendGroupInvitation.query({
         invitee_email: formData.email,
-      });
-      console.log("resInvite", resInvite);
+      })
+      console.log('resInvite', resInvite)
       if (resInvite?.data?.success) {
-        alert("Invitation sent successfully!");
+        alert('Invitation sent successfully!')
+        updateUser?.()
       } else {
-        alert("Failed to send invitation. Please try again.");
+        alert('Failed to send invitation. Please try again.')
       }
     } catch (error) {
-      console.error("Error sending invitation:", error);
+      console.error('Error sending invitation:', error)
       const errorMessage =
         error?.status === 409
-          ? "An invitation has already been sent to this email address."
-          : "An error occurred while sending the invitation. Please try again.";
-      alert(errorMessage);
+          ? 'An invitation has already been sent to this email address.'
+          : 'An error occurred while sending the invitation. Please try again.'
+      alert(errorMessage)
     }
-  }, [formData.email]);
+  }, [formData.email])
 
-  const acceptInvitation = useCallback(async (group_invitation_id: number) => {
-    const resAccpeptInvite = await API.acceptGroupInvitation.query({
-      group_invitation_id,
-    });
-    console.log("resInvite", resAccpeptInvite);
-    if (resAccpeptInvite?.data?.success) {
-      alert("Invitation accepted!");
-    } else {
-      alert("Failed to accept invitation. Please try again.");
-    }
-  }, []);
+  const acceptInvitation = useCallback(
+    async (group_invitation_id: number) => {
+      const resAccpeptInvite = await API.acceptGroupInvitation.query({
+        group_invitation_id,
+      })
+      console.log('resInvite', resAccpeptInvite)
+      if (resAccpeptInvite?.data?.success) {
+        alert('Invitation accepted!')
+        updateUser?.()
+      } else {
+        alert('Failed to accept invitation. Please try again.')
+      }
+    },
+    [updateUser]
+  )
 
-  const invitations = data?.user?.group_invitations || [];
-  const sentInvitations = data?.user?.sent_group_invitations || [];
+  const invitations = data?.user?.group_invitations || []
+  const sentInvitations = data?.user?.sent_group_invitations || []
 
   return (
     <Box mt={1}>
@@ -94,7 +100,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
                 {invitations.map((invitation: any) => (
                   <Flex key={invitation.id} mt={0.5}>
                     <Typography>
-                      from{" "}
+                      from{' '}
                       <Box component="span" fontWeight={500}>
                         {formatUserName(invitation)} ({invitation.email})
                       </Box>
@@ -123,14 +129,14 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       ) : (
         <Box>
           <Typography variant="body2">
-            • You have currentlys no invitation for a group{" "}
+            • You have currentlys no invitation for a group{' '}
           </Typography>
         </Box>
       )}
       {sentInvitations?.length ? (
         <Box mt={1}>
           <Typography variant="body2">
-            • You have sent a group invitation:{" "}
+            • You have sent a group invitation:{' '}
           </Typography>
           {sentInvitations.map((invitation: any) => (
             <Flex key={invitation.id} mt={0.5} gap={1} alignItems="center">
@@ -147,7 +153,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       <Box>
         <Box mt={1}>
           <Typography variant="body2">
-            • {invitations?.length ? "Or start " : "Start "} a group by inviting
+            • {invitations?.length ? 'Or start ' : 'Start '} a group by inviting
             a user to your group
           </Typography>
         </Box>
@@ -170,5 +176,5 @@ export const GroupDetails = (props: GroupDetailsProps) => {
         </Flex>
       </Box>
     </Box>
-  );
-};
+  )
+}

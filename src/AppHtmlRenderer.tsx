@@ -96,6 +96,16 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     }
   }, [])
 
+  const getUser = useCallback(async () => {
+    const resUser = await API.getUser.query()
+    const userData = resUser.data.data
+    console.log('userData', userData)
+    setData((prev: any) => ({
+      ...prev,
+      user: resUser?.data?.data || null,
+    }))
+  }, [])
+
   useEffect(() => {
     const basePath = BASE_URL ?? '/'
     const basePathAdj =
@@ -133,14 +143,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
         navigate('/')
       } else {
         console.log('No Google OAuth state or code found in URL')
-        const resUser = await API.getUser.query()
-        const userData = resUser.data.data
-        console.log('userData', userData)
+        getUser()
         getTasks()
-        setData((prev: any) => ({
-          ...prev,
-          user: resUser?.data?.data || null,
-        }))
       }
     }
 
@@ -303,7 +307,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
       }
       staticInjections.elementReplacementComponent[
         '72e6aba0-ab37-487b-a7f5-ca902879d589'
-      ] = <GroupDetails data={data} />
+      ] = <GroupDetails data={data} updateUser={getUser} />
       staticInjections.elements['ae967b9b-5f9d-49f0-810a-2d2e1a420fab'] = {
         disabled: userGroup?.group_admin_user_id !== data?.user?.user_id,
         tooltip:
@@ -321,6 +325,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     handleOpenEditTaskModal,
     handleOpenNewTaskModal,
     handleDeleteTask,
+    getUser,
   ])
 
   useEffect(() => {
