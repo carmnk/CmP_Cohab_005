@@ -218,7 +218,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
 
   const editorInjections = useMemo(() => {
     const isLoggedUser = !!data?.user?.email
-    const groupMembers = data?.user?.groups?.[0].group_members
+    const groupMembers = data?.user?.groups?.[0]?.group_members
 
     const staticInjections: any = {
       elements: {
