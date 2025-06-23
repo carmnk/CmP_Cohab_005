@@ -5,7 +5,8 @@ import { Tooltip, Badge } from '@mui/material'
 import Icon from '@mdi/react'
 
 export const usersTableDef = (data: any) => {
-  const groupMembers = data?.user?.groups?.[0]?.group_members ?? []
+  const userGroup = data?.user?.groups?.[0]
+  const groupMembers = userGroup?.group_members ?? []
   return {
     data: groupMembers, //[{ column1: "ABCD", column2: "EFGH" }],
     columns: [
@@ -30,16 +31,14 @@ export const usersTableDef = (data: any) => {
           <td>
             <Tooltip
               title={
-                data?.user?.groups?.[0].group_admin_user_id === item.user_id &&
-                'Group Admin'
+                userGroup?.group_admin_user_id === item.user_id && 'Group Admin'
               }
               placement="top"
               arrow
             >
               <Badge
                 badgeContent={
-                  data?.user?.groups?.[0].group_admin_user_id ===
-                    item.user_id && (
+                  userGroup?.group_admin_user_id === item.user_id && (
                     <Icon path={mdiStar} size={0.75} color="orange" />
                   )
                 }

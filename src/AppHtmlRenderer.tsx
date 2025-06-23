@@ -218,7 +218,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
 
   const editorInjections = useMemo(() => {
     const isLoggedUser = !!data?.user?.email
-    // const groupMembers = data?.user?.groups?.[0]?.group_members
+    const userGroup = data?.user?.groups?.[0]
+    const groupMembers = userGroup?.group_members
 
     const staticInjections: any = {
       elements: {
@@ -279,22 +280,19 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     if (data?.user?.groups?.length) {
       // groups page
       staticInjections.elements['4a36426f-5da2-44e4-87ee-22c36f67eef0'] = {
-        label: data?.user?.groups?.[0].group_name
-          ? `${data?.user?.groups?.[0].group_name}`
+        label: userGroup?.group_name
+          ? `${userGroup.group_name}`
           : 'Specify group name',
-        color: data?.user?.groups?.[0].group_name
-          ? undefined
-          : 'text.secondary',
-        fontStyle: data?.user?.groups?.[0].group_name ? undefined : 'italic',
+        color: userGroup?.group_name ? undefined : 'text.secondary',
+        fontStyle: userGroup?.group_name ? undefined : 'italic',
       }
       staticInjections.elements['8a021532-ceb6-495a-a92d-b803280c2a11'] =
         usersTableDef(data)
 
       staticInjections.elements['ae967b9b-5f9d-49f0-810a-2d2e1a420fab'] = {
-        disabled:
-          data?.user?.groups?.[0].group_admin_user_id !== data?.user?.user_id,
+        disabled: userGroup?.group_admin_user_id !== data?.user?.user_id,
         tooltip:
-          data?.user?.groups?.[0].group_admin_user_id !== data?.user?.user_id
+          userGroup?.group_admin_user_id !== data?.user?.user_id
             ? 'You are not the group admin'
             : undefined,
       }
@@ -307,10 +305,9 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
         '72e6aba0-ab37-487b-a7f5-ca902879d589'
       ] = <GroupDetails data={data} />
       staticInjections.elements['ae967b9b-5f9d-49f0-810a-2d2e1a420fab'] = {
-        disabled:
-          data?.user?.groups?.[0].group_admin_user_id !== data?.user?.user_id,
+        disabled: userGroup?.group_admin_user_id !== data?.user?.user_id,
         tooltip:
-          data?.user?.groups?.[0].group_admin_user_id !== data?.user?.user_id
+          userGroup?.group_admin_user_id !== data?.user?.user_id
             ? 'You are not the group admin'
             : undefined,
       }
