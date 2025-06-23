@@ -83,9 +83,13 @@ export const GroupDetails = (props: GroupDetailsProps) => {
 
   const userGroup = data?.user?.groups?.[0]
   const isGroupAdmin = userGroup?.group_admin_user_id === data?.user?.user_id
-  const invitations = data?.user?.group_invitations || []
+
+  const invitations =
+    data?.user?.group_invitations?.filter(
+      (invitation) => invitation.invitation_status !== 'completed'
+    ) || []
   const sentInvitations =
-    data?.user?.sent_group_invitations.filter(
+    data?.user?.sent_group_invitations?.filter(
       (invitation) => invitation.invitation_status !== 'completed'
     ) || []
 
