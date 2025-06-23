@@ -76,9 +76,18 @@ export const TaskModal = (props: TaskModalProps) => {
   const groups = data?.user?.groups
   const groupMembers = groups?.[0]?.group_members
 
-  const initialFormData = task_id
-    ? data?.tasks?.find((task) => task.task_id === task_id) || defaultTaskData
-    : defaultTaskData
+  const existingTask =
+    task_id && data?.tasks?.find((task) => task.task_id === task_id)
+  const initialFormData =
+    task_id && existingTask
+      ? {
+          ...existingTask,
+          due_datetime:
+            typeof existingTask?.due_datetime === 'string'
+              ? moment(existingTask?.due_datetime)
+              : existingTask?.due_datetime,
+        }
+      : defaultTaskData
   const [formData, setFormData] = useState<Task>(initialFormData)
 
   const ownerGroupsOptions = useMemo(() => {
