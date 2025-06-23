@@ -366,6 +366,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
       const resQuery = await query(formData)
       if (resQuery?.data?.success) {
         alert('Successfully saved')
+        setUi((current) => ({ ...current, tasksModal: null }))
         await getTasks()
       } else {
         alert('An error has occured')

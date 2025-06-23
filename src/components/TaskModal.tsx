@@ -1,7 +1,15 @@
-import { CSelect2, CTextField, Modal, MultiSelect } from '@cmk/fe_utils'
-import { Box } from '@mui/material'
+import {
+  CSelect2,
+  CTextField,
+  DatePicker,
+  Modal,
+  MultiSelect,
+} from '@cmk/fe_utils'
+import { Box, Typography } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { formatUserName } from '../utils/formatUsername'
+import { CDateTimePicker } from './DateTimePicker'
+import moment, { Moment } from 'moment'
 
 const taskStatusValues = ['open', 'completed']
 const taskStatusOptions = taskStatusValues.map((val) => ({
@@ -18,6 +26,7 @@ export type Task = {
   owner_group_id: string | null
   task_status: string
   task_editors_user_ids: number[]
+  due_datetime: string | null
 }
 const defaultTaskData: Task = {
   task_name: '',
@@ -26,6 +35,7 @@ const defaultTaskData: Task = {
   owner_group_id: 'null',
   task_status: 'open',
   task_editors_user_ids: [],
+  due_datetime: null,
 }
 
 export type TaskModalProps = {
@@ -42,6 +52,8 @@ const formatFormData = (formDataIn: any) => ({
     formDataIn.owner_group_id === 'null' ? null : formDataIn.owner_group_id,
   owner_user_id:
     formDataIn.owner_user_id === 'null' ? null : formDataIn.owner_user_id,
+  // due_datetime:
+  //   formDataIn.formDataIn !== null ? moment(formDataIn.formDataIn : null,
 })
 const validateFormData = (formData: Task) => {
   if (
@@ -51,6 +63,11 @@ const validateFormData = (formData: Task) => {
   ) {
     return false
   }
+  if (
+    formData?.due_datetime !== null &&
+    !moment(formData?.due_datetime).isValid()
+  )
+    return false
   return true
 }
 
@@ -98,6 +115,11 @@ export const TaskModal = (props: TaskModalProps) => {
       alert('Formdata incomplete')
       return
     }
+    if (formDataAdj?.due_datetime) {
+      formDataAdj.due_datetime = new Date(
+        formDataAdj?.due_datetime
+      ).toISOString()
+    }
 
     console.log('submit', formData, formDataAdj)
     await onConfirm?.(formDataAdj)
@@ -126,6 +148,10 @@ export const TaskModal = (props: TaskModalProps) => {
   const handleChangeArray = useCallback((newValue: string[], e: any) => {
     const name = e?.target?.name
     setFormData((current) => ({ ...current, [name]: newValue }))
+  }, [])
+
+  const handleChangeDate = useCallback((newValue: Moment) => {
+    setFormData((current) => ({ ...current, due_datetime: newValue as any }))
   }, [])
 
   return (
@@ -191,6 +217,26 @@ export const TaskModal = (props: TaskModalProps) => {
             size="small"
             onChange={handleChangeArray}
           />
+          <Box>
+            <Typography variant="caption" component="label">
+              Due Datetime
+            </Typography>
+            <CDateTimePicker
+              format="DD.MM.YYYY HH:mm"
+              slotProps={{
+                textField: {
+                  // name: 'due_datetime',
+                  variant: 'outlined',
+                  size: 'small',
+                  slotProps: { input: { name: 'due_datetime' } },
+                },
+              }}
+              // name="due_datetime"
+              // label="Due Datetime"
+              value={formData?.due_datetime as any}
+              onChange={handleChangeDate}
+            />{' '}
+          </Box>
         </Box>
       </Box>
     </Modal>
