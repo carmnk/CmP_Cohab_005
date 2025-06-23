@@ -1,0 +1,72 @@
+import { AxiosResponse, AxiosRequestConfig } from 'axios'
+import {
+  QueryConfigType,
+  post2,
+  put2,
+  deletion2,
+  getFile2,
+  postWithReturnedFile2,
+  get2,
+} from './apiCalls'
+
+export type QUERY_METHODS =
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'DELETE'
+  | 'GET_FILE'
+  | 'POST_GET_FILE'
+
+export const makeExternalApiQuery = <
+  PayloadType = undefined,
+  ResponseType = unknown,
+  MappedResponseType = ResponseType
+>(
+  url: string,
+  method: QUERY_METHODS = 'GET'
+): {
+  url: string
+  query: (
+    payload?: PayloadType,
+    urlParams?: string,
+    postprocessing?: (response: ResponseType) => MappedResponseType,
+    queryConfig?: QueryConfigType,
+    searchParams?: string
+  ) => Promise<AxiosResponse<ResponseType>>
+  type: QUERY_METHODS
+} => {
+  const queryFn =
+    method === 'POST'
+      ? post2
+      : method === 'PUT'
+      ? put2
+      : method === 'DELETE'
+      ? deletion2
+      : method === 'GET_FILE'
+      ? getFile2
+      : method === 'POST_GET_FILE'
+      ? postWithReturnedFile2
+      : get2
+  return {
+    url: `${url}`,
+    query: (
+      payload?: PayloadType,
+      urlParams?: string,
+      postprocessing?: (response: ResponseType) => MappedResponseType,
+      queryConfig?: AxiosRequestConfig,
+      searchParams?: string
+    ) =>
+      queryFn<PayloadType, ResponseType>(
+        `${url}${urlParams || ''}${
+          urlParams && searchParams
+            ? searchParams
+            : !urlParams && searchParams
+            ? `?${searchParams}`
+            : ''
+        }`,
+        payload,
+        { ...(queryConfig ?? {}), withCredentials: false }
+      ),
+    type: method === 'GET' ? ('GET' as const) : method,
+  }
+}
