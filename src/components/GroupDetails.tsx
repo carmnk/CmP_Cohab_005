@@ -81,7 +81,8 @@ export const GroupDetails = (props: GroupDetailsProps) => {
     [updateUser]
   )
 
-  const userGroup = data?.user?.group?.[0]
+  const userGroup = data?.user?.groups?.[0]
+  const isGroupAdmin = userGroup?.group_admin_user_id === data?.user?.user_id
   const invitations = data?.user?.group_invitations || []
   const sentInvitations =
     data?.user?.sent_group_invitations.filter(
@@ -157,7 +158,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       <Box>
         <Box mt={1}>
           <Typography variant="body2">
-            {userGroup
+            {isGroupAdmin
               ? '• Invite more users to your group'
               : `• ${
                   invitations?.length ? 'Or start ' : 'Start '
