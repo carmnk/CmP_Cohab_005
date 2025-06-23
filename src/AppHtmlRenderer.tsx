@@ -213,6 +213,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
   const navigateToGoogleLogin = useCallback(() => {
     const state = uuidv4()
     const link = getGoogleOauthLoginLink(state)
+    console.log('GLINK', link)
+    return 
     window.location.href = link
   }, [])
 
