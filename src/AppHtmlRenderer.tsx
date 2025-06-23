@@ -300,6 +300,9 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
             ? 'You are not the group admin'
             : undefined,
       }
+       staticInjections.elementReplacementComponent[
+        'a9776892-b7f0-435f-9f36-dcb3a31a11d2'
+      ] = <GroupDetails data={data} updateUser={getUser} />
     } else {
       // groups page
       staticInjections.elements['4a36426f-5da2-44e4-87ee-22c36f67eef0'] = {
