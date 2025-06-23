@@ -184,8 +184,6 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
   const navigateRaw = useNavigate()
   const navigate = useCallback(
     (to: string) => {
-      // const toAdj = to.startsWith("/") ? to.slice(1) : to;
-      // const distination = BASE_URL + toAdj;
       const toAdj = to.startsWith('/') ? to.slice(1) : to
       console.log('navigate', to, 'toAdj', toAdj)
       navigateRaw(toAdj)
