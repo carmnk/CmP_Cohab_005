@@ -15,7 +15,7 @@ import {
   ListItemText,
   useTheme,
 } from "@mui/material";
-import { formatUserName } from "../../utils/formatUserName";
+import { formatUserName } from "../../utils/formatUsername";
 import { useCallback, useRef, useState } from "react";
 import Icon from "@mdi/react";
 

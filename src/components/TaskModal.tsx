@@ -1,7 +1,7 @@
 import { CSelect2, CTextField, Modal, MultiSelect } from "@cmk/fe_utils";
 import { Box } from "@mui/material";
 import { useCallback, useMemo, useState } from "react";
-import { formatUserName } from "../utils/formatUserName";
+import { formatUserName } from "../utils/formatUsername";
 
 const taskStatusValues = ["open", "completed"];
 const taskStatusOptions = taskStatusValues.map((val) => ({

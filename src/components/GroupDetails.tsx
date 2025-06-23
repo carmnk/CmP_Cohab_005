@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { Icon } from "@mdi/react";
 import { mdiCheckCircleOutline, mdiEmailFastOutline } from "@mdi/js";
 import { API } from "../api/API";
-import { formatUserName } from "../utils/formatUserName";
+import { formatUserName } from "../utils/formatUsername";
 
 export type GroupDetailsProps = {
   data?: any;

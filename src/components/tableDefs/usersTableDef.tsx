@@ -1,5 +1,5 @@
 import { Button } from "@cmk/fe_utils";
-import { formatUserName } from "../../utils/formatUserName";
+import { formatUserName } from "../../utils/formatUsername";
 import { mdiStar, mdiDotsVertical } from "@mdi/js";
 import { Tooltip, Badge } from "@mui/material";
 import Icon from "@mdi/react";
