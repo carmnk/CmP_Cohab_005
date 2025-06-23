@@ -1,136 +1,136 @@
-import { CSelect2, CTextField, Modal, MultiSelect } from "@cmk/fe_utils";
-import { Box } from "@mui/material";
-import { useCallback, useMemo, useState } from "react";
-import { formatUserName } from "../utils/formatUsername";
+import { CSelect2, CTextField, Modal, MultiSelect } from '@cmk/fe_utils'
+import { Box } from '@mui/material'
+import { useCallback, useMemo, useState } from 'react'
+import { formatUserName } from '../utils/formatUsername'
 
-const taskStatusValues = ["open", "completed"];
+const taskStatusValues = ['open', 'completed']
 const taskStatusOptions = taskStatusValues.map((val) => ({
   value: val,
   label: val,
   textLabel: val,
-}));
+}))
 
 export type Task = {
-  task_id?: number;
-  task_name: string;
-  task_description: string;
-  owner_user_id: string | null;
-  owner_group_id: string | null;
-  task_status: string;
-  task_editors_user_ids: number[];
-};
+  task_id?: number
+  task_name: string
+  task_description: string
+  owner_user_id: string | null
+  owner_group_id: string | null
+  task_status: string
+  task_editors_user_ids: number[]
+}
 const defaultTaskData: Task = {
-  task_name: "",
-  task_description: "",
-  owner_user_id: "null",
-  owner_group_id: "null",
-  task_status: "open",
+  task_name: '',
+  task_description: '',
+  owner_user_id: 'null',
+  owner_group_id: 'null',
+  task_status: 'open',
   task_editors_user_ids: [],
-};
+}
 
 export type TaskModalProps = {
-  data: any;
-  open: boolean;
-  onClose: () => void;
-  onConfirm: (formData: Task) => Promise<void>;
-  task_id?: number;
-};
+  data: any
+  open: boolean
+  onClose: () => void
+  onConfirm: (formData: Task) => Promise<void>
+  task_id?: number
+}
 
 const formatFormData = (formDataIn: any) => ({
   ...formDataIn,
   owner_group_id:
-    formDataIn.owner_group_id === "null" ? null : formDataIn.owner_group_id,
+    formDataIn.owner_group_id === 'null' ? null : formDataIn.owner_group_id,
   owner_user_id:
-    formDataIn.owner_user_id === "null" ? null : formDataIn.owner_user_id,
-});
+    formDataIn.owner_user_id === 'null' ? null : formDataIn.owner_user_id,
+})
 const validateFormData = (formData: Task) => {
   if (
-    ["task_name", "owner_user_id", "task_status"].find(
+    ['task_name', 'owner_user_id', 'task_status'].find(
       (fieldName) => !formData[fieldName]
     )
   ) {
-    return false;
+    return false
   }
-  return true;
-};
+  return true
+}
 
 export const TaskModal = (props: TaskModalProps) => {
-  const { data, open, onClose, onConfirm, task_id } = props;
-  const groups = data?.user?.groups;
-  const groupMembers = groups?.[0]?.group_members;
+  const { data, open, onClose, onConfirm, task_id } = props
+  const groups = data?.user?.groups
+  const groupMembers = groups?.[0]?.group_members
 
   const initialFormData = task_id
     ? data?.tasks?.find((task) => task.task_id === task_id) || defaultTaskData
-    : defaultTaskData;
-  const [formData, setFormData] = useState<Task>(initialFormData);
+    : defaultTaskData
+  const [formData, setFormData] = useState<Task>(initialFormData)
 
   const ownerGroupsOptions = useMemo(() => {
     return [
-      { value: "null", label: "Only You" },
+      { value: 'null', label: 'Only You' },
       ...(groups?.map?.((gr) => ({
         value: gr.group_id,
-        label: gr.group_name || "Your Group (unnamed)",
+        label: gr.group_name || 'Your Group (unnamed)',
       })) ?? []),
-    ];
-  }, [groups]);
+    ]
+  }, [groups])
 
   const groupMemberOptions = useMemo(() => {
     return [
-      ...(groupMembers
+      ...((groupMembers ?? [])
         ?.map?.((mem) => ({
           value: mem.user_id,
           label: formatUserName(mem),
         }))
         .filter(
           (member) =>
-            formData?.owner_group_id !== "null" ||
+            formData?.owner_group_id !== 'null' ||
             member.value === data?.user?.user_id
         ) ?? []),
-    ];
-  }, [groupMembers, data?.user, formData?.owner_group_id]);
+    ]
+  }, [groupMembers, data?.user, formData?.owner_group_id])
 
   const handleSubmit = useCallback(async () => {
-    const formDataAdj = formatFormData(formData);
+    const formDataAdj = formatFormData(formData)
     if (!task_id) {
-      formDataAdj.owner_user_id = data?.user?.user_id;
+      formDataAdj.owner_user_id = data?.user?.user_id
     }
     if (!validateFormData(formDataAdj)) {
-      alert("Formdata incomplete");
-      return;
+      alert('Formdata incomplete')
+      return
     }
 
-    console.log("submit", formData, formDataAdj);
-    await onConfirm?.(formDataAdj);
-  }, [formData, onConfirm, data?.user, task_id]);
+    console.log('submit', formData, formDataAdj)
+    await onConfirm?.(formDataAdj)
+  }, [formData, onConfirm, data?.user, task_id])
 
   const handleChange = useCallback((newValue: string, e: any) => {
-    const name = e?.target?.name;
-    setFormData((current) => ({ ...current, [name]: newValue }));
-  }, []);
+    const name = e?.target?.name
+    setFormData((current) => ({ ...current, [name]: newValue }))
+  }, [])
   const handleChangeOwnerGroup = useCallback(
     (newValue: string, e: any) => {
-      const name = e?.target?.name;
+      const name = e?.target?.name
       setFormData((current) => ({
         ...current,
         [name]: newValue,
         task_editors_user_ids:
-          newValue === "null"
+          newValue === 'null'
             ? current.task_editors_user_ids.filter(
                 (id) => id === data?.user?.user_id
               )
             : current.task_editors_user_ids,
-      }));
+      }))
     },
     [data?.user]
-  );
+  )
   const handleChangeArray = useCallback((newValue: string[], e: any) => {
-    const name = e?.target?.name;
-    setFormData((current) => ({ ...current, [name]: newValue }));
-  }, []);
+    const name = e?.target?.name
+    setFormData((current) => ({ ...current, [name]: newValue }))
+  }, [])
 
   return (
     <Modal
-      header={task_id ? "Edit Task" : "Add Task"}
+      header={task_id ? 'Edit Task' : 'Add Task'}
       open={open}
       width={640}
       isConfirmation
@@ -166,11 +166,11 @@ export const TaskModal = (props: TaskModalProps) => {
             onChange={handleChange}
           />
         )}
-        <Box display="grid" gridTemplateColumns={"1fr 1fr"} gap={2}>
+        <Box display="grid" gridTemplateColumns={'1fr 1fr'} gap={2}>
           <CSelect2
             name="owner_group_id"
             label="Group"
-            value={formData.owner_group_id ?? ""}
+            value={formData.owner_group_id ?? ''}
             options={ownerGroupsOptions}
             size="small"
             onChange={handleChangeOwnerGroup}
@@ -194,5 +194,5 @@ export const TaskModal = (props: TaskModalProps) => {
         </Box>
       </Box>
     </Modal>
-  );
-};
+  )
+}

@@ -1,10 +1,5 @@
-import { AlertDialog, Button, Flex } from "@cmk/fe_utils";
-import {
-  mdiAccountGroup,
-  mdiDelete,
-  mdiDotsVertical,
-  mdiPencil,
-} from "@mdi/js";
+import { AlertDialog, Button, Flex } from '@cmk/fe_utils'
+import { mdiAccountGroup, mdiDelete, mdiDotsVertical, mdiPencil } from '@mdi/js'
 import {
   Typography,
   Tooltip,
@@ -14,17 +9,17 @@ import {
   ListItemIcon,
   ListItemText,
   useTheme,
-} from "@mui/material";
-import { formatUserName } from "../../utils/formatUsername";
-import { useCallback, useRef, useState } from "react";
-import Icon from "@mdi/react";
+} from '@mui/material'
+import { formatUserName } from '../../utils/formatUsername'
+import { useCallback, useRef, useState } from 'react'
+import Icon from '@mdi/react'
 
 export const taskTableDef = (
   data: any,
   openTaskModal: (task_id: number) => void,
   deleteTask: (task_id: number) => void
 ) => {
-  const groupMembers = data?.user?.groups?.[0].group_members;
+  const groupMembers = data?.user?.groups?.[0]?.group_members ?? []
 
   return {
     data: data?.tasks, //[{ column1: "ABCD", column2: "EFGH" }],
@@ -38,12 +33,12 @@ export const taskTableDef = (
       {
         // sortKey: "email",
         // filterKey: "column1",
-        header: "Name/Description",
+        header: 'Name/Description',
         renderCell: (item, iIdx) => (
           <td key={iIdx}>
-            <Typography>{item?.task_name ?? "-"}</Typography>
+            <Typography>{item?.task_name ?? '-'}</Typography>
             <Typography variant="body2">
-              {item?.task_description ?? ""}
+              {item?.task_description ?? ''}
             </Typography>
           </td>
         ),
@@ -68,17 +63,17 @@ export const taskTableDef = (
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: "4rem" },
+        style: { width: '4rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
             <Typography>Created</Typography>
           </Flex>
         ),
         renderCell: (item, iIdx) => {
-          const creatorUser = groupMembers?.find(
+          const creatorUser = groupMembers?.find?.(
             (memb) => memb.user_id === item?.owner_user_id
-          );
-          const label = creatorUser ? formatUserName(creatorUser)?.[0] : "?";
+          )
+          const label = creatorUser ? formatUserName(creatorUser)?.[0] : '?'
           return (
             <td key={iIdx}>
               <Flex alignItems="center" justifyContent="center">
@@ -91,23 +86,23 @@ export const taskTableDef = (
                 </Tooltip>
               </Flex>
             </td>
-          );
+          )
         },
       },
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: "6rem" },
+        style: { width: '6rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
             <Typography>In Charge</Typography>
           </Flex>
         ),
         renderCell: (item, iIdx) => {
-          const editorUserIds = item.task_editors_user_ids || [];
+          const editorUserIds = item.task_editors_user_ids || []
           const editorUsers = editorUserIds.map((eUserId) =>
             groupMembers?.find((memb) => memb.user_id === eUserId)
-          );
+          )
           // const label = creatorUser ? formatUserName(creatorUser)?.[0] : "?";
           return (
             <td key={iIdx}>
@@ -115,19 +110,19 @@ export const taskTableDef = (
                 {editorUsers.map((eUser) => (
                   <Tooltip title={formatUserName(eUser)} placement="top" arrow>
                     <Avatar sx={{ width: 32, height: 32, ml: -1.5 }}>
-                      {formatUserName(eUser)?.[0] || "?"}
+                      {formatUserName(eUser)?.[0] || '?'}
                     </Avatar>
                   </Tooltip>
                 ))}
               </Flex>
             </td>
-          );
+          )
         },
       },
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: "4rem" },
+        style: { width: '4rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
             <Typography>Group</Typography>
@@ -142,26 +137,26 @@ export const taskTableDef = (
                     iconButton
                     variant="outlined"
                     icon={mdiAccountGroup}
-                    size={"small"}
+                    size={'small'}
                     color="success"
                     tooltip={
                       item?.owner_group_id
                         ? data?.user?.groups?.find(
                             (gr) => gr.group_id === item?.owner_group_id
                           )?.group_name
-                        : "Your group (unnamed)"
+                        : 'Your group (unnamed)'
                     }
                   />
                 )}
               </Flex>
             </td>
-          );
+          )
         },
       },
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: "6rem" },
+        style: { width: '6rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
             <Typography>Status</Typography>
@@ -174,15 +169,15 @@ export const taskTableDef = (
                 {item?.task_status}
               </Flex>
             </td>
-          );
+          )
         },
       },
 
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: "2rem" },
-        header: "",
+        style: { width: '2rem' },
+        header: '',
         renderCell: (item, rIdx, cIdx) => {
           return (
             <MoreActionsColumn
@@ -191,85 +186,85 @@ export const taskTableDef = (
               onOpenTaskModal={openTaskModal}
               deleteTask={deleteTask}
             />
-          );
+          )
         },
       },
     ],
-  };
-};
+  }
+}
 
 const anchorOrigin = {
-  vertical: "bottom" as const,
-  horizontal: "center" as const,
-};
+  vertical: 'bottom' as const,
+  horizontal: 'center' as const,
+}
 const transformOrigin = {
-  vertical: "top" as const,
-  horizontal: "center" as const,
-};
+  vertical: 'top' as const,
+  horizontal: 'center' as const,
+}
 const alertProps = {
   slotProps: {
     paper: {
-      sx: { maxWidth: "90%", width: 600 },
+      sx: { maxWidth: '90%', width: 600 },
     },
     confirmButton: {
-      color: "secondary" as const,
+      color: 'secondary' as const,
     },
     cancelConfirmButton: {
-      color: "secondary" as const,
+      color: 'secondary' as const,
     },
   },
   sx: {
-    "& .MuiPaper-root": {
-      minWidth: "auto",
+    '& .MuiPaper-root': {
+      minWidth: 'auto',
     },
   },
-};
+}
 
 export type MoreActionsColumnProps = {
-  index: number;
-  item: any;
-  onOpenTaskModal: (task_id: number) => void;
-  deleteTask: (task_id: number) => void;
-};
+  index: number
+  item: any
+  onOpenTaskModal: (task_id: number) => void
+  deleteTask: (task_id: number) => void
+}
 
 const MoreActionsColumn = (props: MoreActionsColumnProps) => {
-  const { index, item, onOpenTaskModal, deleteTask } = props;
-  const theme = useTheme();
-  const ref = useRef(null);
+  const { index, item, onOpenTaskModal, deleteTask } = props
+  const theme = useTheme()
+  const ref = useRef(null)
 
   const [ui, setUi] = useState({
     openMenu: false,
     openDeleteConfirm: false,
-  });
+  })
 
   const handleToggleOpenMenu = useCallback(() => {
-    setUi((current) => ({ ...current, openMenu: !current.openMenu }));
-  }, []);
+    setUi((current) => ({ ...current, openMenu: !current.openMenu }))
+  }, [])
   const handleToggleOpenConfirmDelete = useCallback(() => {
     setUi((current) => ({
       ...current,
       openDeleteConfirm: !current.openDeleteConfirm,
-    }));
-  }, []);
+    }))
+  }, [])
 
   const handleEditItem = useCallback(() => {
-    onOpenTaskModal?.(item?.task_id);
-    setUi((current) => ({ ...current, openMenu: false }));
-  }, []);
+    onOpenTaskModal?.(item?.task_id)
+    setUi((current) => ({ ...current, openMenu: false }))
+  }, [])
   const handleDeleteItem = useCallback(() => {
-    handleToggleOpenConfirmDelete();
-    setUi((current) => ({ ...current, openMenu: false }));
-  }, []);
+    handleToggleOpenConfirmDelete()
+    setUi((current) => ({ ...current, openMenu: false }))
+  }, [])
 
   const handleConfirmedDelete = useCallback(() => {
     // alert("Send deletion request here for task_id=" + item?.task_id);
-    deleteTask(item?.task_id);
+    deleteTask(item?.task_id)
     setUi((current) => ({
       ...current,
       openMenu: false,
       openDeleteConfirm: false,
-    }));
-  }, [item, deleteTask]);
+    }))
+  }, [item, deleteTask])
   return (
     <>
       <td key={index} ref={ref}>
@@ -297,7 +292,7 @@ const MoreActionsColumn = (props: MoreActionsColumnProps) => {
           <ListItemIcon>
             <Icon path={mdiDelete} size={1} color={theme.palette.error.light} />
           </ListItemIcon>
-          <ListItemText sx={{ color: "error.light" }}>Delete Task</ListItemText>
+          <ListItemText sx={{ color: 'error.light' }}>Delete Task</ListItemText>
         </MenuItem>
       </Menu>
       <AlertDialog
@@ -315,5 +310,5 @@ const MoreActionsColumn = (props: MoreActionsColumnProps) => {
         onConfirm={handleConfirmedDelete}
       />
     </>
-  );
-};
+  )
+}

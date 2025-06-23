@@ -12,7 +12,7 @@ declare const BASE_URL: string
 export const TasksSection = (props: TasksSectionProps) => {
   const { data } = props
   const tasks = data?.tasks
-  const groupMembers = data?.user?.groups?.[0].group_members
+  // const groupMembers = data?.user?.groups?.[0]?.group_members
 
   const navigateRaw = useNavigate()
   const navigate = useCallback(
