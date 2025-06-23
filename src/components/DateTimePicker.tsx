@@ -6,9 +6,7 @@ import {
   DateTimePickerProps,
 } from '@mui/x-date-pickers/DateTimePicker'
 
-export type CDateTimePickerProps = DateTimePickerProps<any> & {
-  label: string
-}
+export type CDateTimePickerProps = DateTimePickerProps<any> 
 
 export const CDateTimePicker = (props: CDateTimePickerProps) => {
   const { label, ...rest } = props

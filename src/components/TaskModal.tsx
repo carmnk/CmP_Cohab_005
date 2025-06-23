@@ -244,7 +244,7 @@ export const TaskModal = (props: TaskModalProps) => {
               // label="Due Datetime"
               value={formData?.due_datetime as any}
               onChange={handleChangeDate}
-            />{' '}
+            />
           </Box>
         </Box>
       </Box>
