@@ -81,8 +81,12 @@ export const GroupDetails = (props: GroupDetailsProps) => {
     [updateUser]
   )
 
+  const userGroup = data?.user?.group?.[0]
   const invitations = data?.user?.group_invitations || []
-  const sentInvitations = data?.user?.sent_group_invitations || []
+  const sentInvitations =
+    data?.user?.sent_group_invitations.filter(
+      (invitation) => invitation.invitation_status !== 'completed'
+    ) || []
 
   return (
     <Box mt={1}>
@@ -153,8 +157,12 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       <Box>
         <Box mt={1}>
           <Typography variant="body2">
-            • {invitations?.length ? 'Or start ' : 'Start '} a group by inviting
-            a user to your group
+            {userGroup
+              ? '• Invite more users to your group'
+              : `• ${
+                  invitations?.length ? 'Or start ' : 'Start '
+                } a group by inviting
+            a user to your group}`}
           </Typography>
         </Box>
         <Flex alignItems="center" gap={1} mt={1}>
