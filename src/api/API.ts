@@ -11,6 +11,16 @@ export const API = {
   ),
 
   getUser: makeApiQuery<never, any>('api/v1/apps/cohab/user'),
+  changeUsername: makeApiQuery<{ user_name: string }, any>(
+    'api/v1/apps/cohab/username',
+    'PUT'
+  ),
+  changeGroupName: (group_id: number) =>
+    makeApiQuery<{ group_name: string }, any>(
+      `api/v1/apps/cohab/groupname/${group_id}`,
+      'PUT'
+    ),
+
   logoutUser: makeApiQuery<never, any>('api/v1/apps/cohab/user/logout', 'POST'),
   getTasks: makeApiQuery<never, any>('api/v1/apps/cohab/tasks'),
   createTask: makeApiQuery<never, any>('api/v1/apps/cohab/task', 'POST'),

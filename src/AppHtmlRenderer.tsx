@@ -11,15 +11,15 @@ import {
 import axios from 'axios'
 import { UserImage } from './components/UserImage'
 import { QUERY_METHOD } from './api/00_utils/httpQuery'
-import { GroupDetails } from './components/GroupDetails'
+import { GroupDetails } from './components/UsersGroupDetails'
 import { formatUserName } from './utils/formatUsername'
 import { TaskModal } from './components/TaskModal'
 import { taskTableDef } from './components/tableDefs/taskTableDef'
-import { usersTableDef } from './components/tableDefs/usersTableDef'
-import { UpdatesSection } from './components/UpdatesSection'
-import { TasksSection } from './components/TasksSection'
-import { SchedulesSection } from './components/SchedulesSection'
+import { UpdatesSection } from './components/IndexUpdatesSection'
+import { TasksSection } from './components/IndexTasksSection'
+import { SchedulesSection } from './components/IndexSchedulesSection'
 import { useAppController } from './appController/useAppController'
+import { UsersYouSection } from './components/UsersYouSection'
 
 declare const BASE_URL: string
 
@@ -180,9 +180,10 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     if (isLoggedUser) {
       // components
       // appbar
-      staticInjections.elements['b4097a2a-65bd-4d37-9732-9a6c7bb64442'] = {
-        src: userImage ?? '',
-      }
+      staticInjections.elementReplacementComponent[
+        '4cf5b14d-6151-4b82-9cb4-95ac4185c496'
+      ] = <UserImage src={userImage as any} key={userImage} />
+
       // index page
       staticInjections.elements['cabf631d-45b4-4432-9d6d-60e935d041d7'] = {
         label: `Welcome ${
@@ -191,63 +192,23 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
       }
 
       // users page
-      staticInjections.elements['f0a6d968-dfbb-45fc-9fab-2aa142b1f538'] = {
-        label: formatUserName(data?.user),
-      }
-      staticInjections.elements['58992f99-5ddd-44fc-8da6-325c6699a122'] = {
-        label: `${data?.user?.email}`,
-      }
       staticInjections.elementReplacementComponent[
-        '4cf5b14d-6151-4b82-9cb4-95ac4185c496'
-      ] = <UserImage src={userImage as any} key={userImage} />
+        '29ab1a9e-c690-45d3-b0be-1bc07cd24a8d'
+      ] = (
+        <UsersYouSection
+          data={data}
+          key={'users_you_section'}
+          userImageSrc={userImage}
+        />
+      )
+
+      staticInjections.elementReplacementComponent[
+        'deeca0a8-4c90-4512-b58d-c70ea468df1d'
+      ] = <GroupDetails data={data} updateUser={getUser} />
     }
 
     staticInjections.elements['ce3acc38-6f07-4021-9691-6470d0679ceb'] =
       taskTableDef(data, handleOpenEditTaskModal, deleteTask)
-
-    if (data?.user?.groups?.length) {
-      // groups page
-      staticInjections.elements['4a36426f-5da2-44e4-87ee-22c36f67eef0'] = {
-        label: userGroup?.group_name
-          ? `${userGroup.group_name}`
-          : 'Specify group name',
-        color: userGroup?.group_name ? undefined : 'text.secondary',
-        fontStyle: userGroup?.group_name ? undefined : 'italic',
-      }
-      staticInjections.elements['8a021532-ceb6-495a-a92d-b803280c2a11'] =
-        usersTableDef(data)
-
-      staticInjections.elements['ae967b9b-5f9d-49f0-810a-2d2e1a420fab'] = {
-        disabled: userGroup?.group_admin_user_id !== data?.user?.user_id,
-        tooltip:
-          userGroup?.group_admin_user_id !== data?.user?.user_id
-            ? 'You are not the group admin'
-            : undefined,
-      }
-      const isGroupAdmin =
-        userGroup?.group_admin_user_id === data?.user?.user_id
-
-      if (isGroupAdmin) {
-        staticInjections.elementReplacementComponent[
-          'a9776892-b7f0-435f-9f36-dcb3a31a11d2'
-        ] = <GroupDetails data={data} updateUser={getUser} />
-      }
-    } else {
-      // groups page
-      staticInjections.elements['4a36426f-5da2-44e4-87ee-22c36f67eef0'] = {
-        label: 'Your are not yet part of any group',
-      }
-      staticInjections.elementReplacementComponent[
-        '72e6aba0-ab37-487b-a7f5-ca902879d589'
-      ] = <GroupDetails data={data} updateUser={getUser} />
-      staticInjections.elements['ae967b9b-5f9d-49f0-810a-2d2e1a420fab'] = {
-        disabled: userGroup?.group_admin_user_id !== data?.user?.user_id,
-        tooltip:
-          userGroup?.group_admin_user_id !== data?.user?.user_id
-            ? 'You are not the group admin'
-            : undefined,
-      }
-    }
 
     return staticInjections
   }, [

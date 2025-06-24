@@ -36,9 +36,13 @@ export const TasksSection = (props: TasksSectionProps) => {
     <Box minHeight="8rem" mt="1rem">
       {/* <Typography variant="h6">Tasks</Typography> */}
 
-      <Box display="grid" gridTemplateColumns="1fr 1fr 2rem" gap={2}>
+      <Box
+        display="grid"
+        gridTemplateColumns="1fr 1fr 2rem"
+        gap={'0.25rem 1rem'}
+      >
         <Typography></Typography>
-        <Typography>Open</Typography>
+        <Typography fontWeight={500}>Open</Typography>
         <Typography></Typography>
 
         <Typography>My Personal Tasks ({privateTasks.length})</Typography>
