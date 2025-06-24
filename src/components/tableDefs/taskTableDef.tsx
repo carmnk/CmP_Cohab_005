@@ -1,5 +1,12 @@
 import { AlertDialog, Button, Flex } from '@cmk/fe_utils'
-import { mdiAccountGroup, mdiDelete, mdiDotsVertical, mdiPencil } from '@mdi/js'
+import {
+  mdiAccountGroup,
+  mdiCheck,
+  mdiDelete,
+  mdiDotsVertical,
+  mdiPencil,
+  mdiPlus,
+} from '@mdi/js'
 import {
   Typography,
   Tooltip,
@@ -67,7 +74,9 @@ export const taskTableDef = (
         style: { width: '4rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
-            <Typography>Created</Typography>
+            <Tooltip title="Task creator" placement="top" arrow>
+              <Icon path={mdiPlus} size={1} />
+            </Tooltip>
           </Flex>
         ),
         renderCell: (item, iIdx) => {
@@ -101,10 +110,12 @@ export const taskTableDef = (
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: '6rem' },
+        style: { width: '3rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
-            <Typography>In Charge</Typography>
+            <Tooltip title="Task editors" placement="top" arrow>
+              <Icon path={mdiPencil} size={1} />
+            </Tooltip>
           </Flex>
         ),
         renderCell: (item, iIdx) => {
@@ -138,7 +149,7 @@ export const taskTableDef = (
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: '4rem' },
+        style: { width: '3rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
             <Typography>Group</Typography>
@@ -149,20 +160,22 @@ export const taskTableDef = (
             <td key={iIdx}>
               <Flex alignItems="center" justifyContent="center">
                 {item?.owner_group_id && (
-                  <Button
-                    iconButton
-                    variant="outlined"
-                    icon={mdiAccountGroup}
-                    size={'small'}
-                    color="success"
-                    tooltip={
-                      item?.owner_group_id
-                        ? data?.user?.groups?.find(
-                            (gr) => gr.group_id === item?.owner_group_id
-                          )?.group_name
-                        : 'Your group (unnamed)'
-                    }
-                  />
+                  // <Button
+                  //   iconButton
+                  //   variant="outlined"
+                  //   icon={mdiAccountGroup}
+                  //   size={'small'}
+                  //   color="success"
+                  //   tooltip={
+                  //     item?.owner_group_id
+                  //       ? data?.user?.groups?.find(
+                  //           (gr) => gr.group_id === item?.owner_group_id
+                  //         )?.group_name
+                  //       : 'Your group (unnamed)'
+                  //   }
+                  // />
+
+                  <Icon path={mdiCheck} size={1} />
                 )}
               </Flex>
             </td>
@@ -172,7 +185,7 @@ export const taskTableDef = (
       {
         // sortKey: "email",
         // filterKey: "column1",
-        style: { width: '6rem' },
+        style: { width: '5rem' },
         header: (
           <Flex justifyContent="center" alignItems="center">
             <Typography>Status</Typography>
@@ -182,7 +195,11 @@ export const taskTableDef = (
           return (
             <td key={iIdx}>
               <Flex alignItems="center" justifyContent="center">
-                {item?.task_status}
+                {item?.task_status === 'completed' ? (
+                  <Icon path={mdiCheck} size={1} />
+                ) : (
+                  item?.task_status
+                )}
               </Flex>
             </td>
           )
