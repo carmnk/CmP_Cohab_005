@@ -13,6 +13,7 @@ import {
 import { formatUserName } from '../../utils/formatUsername'
 import { useCallback, useRef, useState } from 'react'
 import Icon from '@mdi/react'
+import { getUserInitials } from '../../utils/getUserInitials'
 
 export const taskTableDef = (
   data: any,
@@ -82,7 +83,15 @@ export const taskTableDef = (
                   placement="top"
                   arrow
                 >
-                  <Avatar sx={{ width: 32, height: 32 }}>{label}</Avatar>
+                  <Avatar
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      background: creatorUser?.user_color,
+                    }}
+                  >
+                    {creatorUser && getUserInitials(creatorUser)}
+                  </Avatar>
                 </Tooltip>
               </Flex>
             </td>
@@ -109,8 +118,15 @@ export const taskTableDef = (
               <Flex alignItems="center" justifyContent="center">
                 {editorUsers.map((eUser) => (
                   <Tooltip title={formatUserName(eUser)} placement="top" arrow>
-                    <Avatar sx={{ width: 32, height: 32, ml: -1.5 }}>
-                      {formatUserName(eUser)?.[0] || '?'}
+                    <Avatar
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        ml: -1.5,
+                        bgcolor: eUser?.user_color,
+                      }}
+                    >
+                      {eUser && getUserInitials(eUser)}
                     </Avatar>
                   </Tooltip>
                 ))}

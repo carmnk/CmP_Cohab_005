@@ -15,6 +15,10 @@ export const API = {
     'api/v1/apps/cohab/username',
     'PUT'
   ),
+  changeUserColor: makeApiQuery<{ user_color: string }, any>(
+    'api/v1/apps/cohab/usercolor',
+    'PUT'
+  ),
   changeGroupName: (group_id: number) =>
     makeApiQuery<{ group_name: string }, any>(
       `api/v1/apps/cohab/groupname/${group_id}`,

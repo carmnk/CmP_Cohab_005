@@ -1,10 +1,10 @@
-import { Box, Chip, Stack, Typography } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { Avatar, Box, Chip, Stack, Typography } from '@mui/material'
 import { formatUserName } from '../utils/formatUsername'
 import { useCallback, useState } from 'react'
-import { Button, CTextField, Flex } from '@cmk/fe_utils'
+import { Button, ColorPicker, CTextField, Flex } from '@cmk/fe_utils'
 import { mdiCheck, mdiPencil } from '@mdi/js'
 import { API } from '../api/API'
+import { getUserInitials } from '../utils/getUserInitials'
 
 export type UsersYouSectionProps = {
   data: any
@@ -17,7 +17,10 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
   const { data, userImageSrc, updateUser } = props
   const user = data?.user
 
-  const [formData, setFormData] = useState({ user_name: formatUserName(user) })
+  const [formData, setFormData] = useState({
+    user_name: formatUserName(user),
+    user_color: '',
+  })
 
   const handleChangeUsername = useCallback((newValue: string) => {
     setFormData((current) => ({ ...current, user_name: newValue }))
@@ -51,6 +54,31 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
       setUi((current) => ({ ...current, isEditUserName: false }))
     }
   }, [formData, updateUser, user])
+
+  const handleSubmitChangeUserColor = useCallback(
+    async (newValue: string) => {
+      if (!newValue) {
+        alert('Usercolor must not be empty')
+        return
+      }
+      try {
+        const resChangeQuerry = await API.changeUserColor.query({
+          user_color: newValue,
+        })
+        updateUser?.()
+        // setUi((current) => ({ ...current, isEditUse rName: false }))
+      } catch (e) {
+        alert('error changing Username')
+        setFormData((current) => ({
+          ...current,
+          // user_name: formatUserName(user),
+          user_color: user?.user_color,
+        }))
+        // setUi((current) => ({ ...current, isEditUserName: false }))
+      }
+    },
+    [updateUser, user]
+  )
 
   return (
     <Box>
@@ -90,6 +118,27 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
               </Flex>
             )}
             <Typography>{user?.email}</Typography>
+            <Flex mt={'1rem'} alignItems="center" gap="0.5rem">
+              <Typography variant="body1">User Color</Typography>
+              <ColorPicker
+                value={user?.user_color}
+                disableThemeColors
+                onChange={handleSubmitChangeUserColor}
+              />
+              <Typography variant="body2" fontStyle="italic">
+                Preview
+              </Typography>
+              <Avatar
+                sx={{
+                  background: user?.user_color,
+                  width: 30,
+                  height: 30,
+                  ml: '0.5rem',
+                }}
+              >
+                {user?.user_name && getUserInitials?.(user)}
+              </Avatar>
+            </Flex>
           </Box>
         </Box>
 
@@ -99,9 +148,9 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
           width="4rem"
           overflow="hidden"
           borderRadius={9999}
-          border="1px solid #666"
+          border={`5px solid ${user?.user_color ?? '#666'}`}
         >
-          {userImageSrc && (
+          {userImageSrc && userImageSrc.startsWith('data:image') && (
             <img src={userImageSrc} alt="user" width={64} height={64} />
           )}
         </Box>

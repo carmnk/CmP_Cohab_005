@@ -148,6 +148,19 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
 
     const staticInjections: any = {
       elements: {
+        // listnav index
+        '2e2a3f38-b5ec-40b6-bd76-e28bdf58ad01': {
+          value: '',
+        },
+        '51606897-b456-48ea-8110-6bf34e026a05': {
+          value: 'users',
+        },
+        '92508310-e55e-41a9-8f07-d7a4dd3543f1': {
+          value: 'tasks',
+        },
+        '52b618b9-f949-4541-8052-190a1583bcbe': {
+          value: 'schedules',
+        },
         '511fca47-8ca0-4445-b01b-13776fd49e7c': {
           onClick: navigateToGoogleLogin,
         },
@@ -199,6 +212,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
           data={data}
           key={'users_you_section'}
           userImageSrc={userImage}
+          updateUser={getUser}
         />
       )
 
