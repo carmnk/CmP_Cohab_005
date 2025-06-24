@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { getGoogleOauthLoginLink } from '../api/googleLink'
 
 export const useAppController = () => {
-  const [data, setData] = useState<any>({ user: null as any, tasks: [] })
+  const [data, setData] = useState({ user: null as any, tasks: [] as any[] })
   const [ui, setUi] = useState<{
     initialized: boolean
     tasksModal: null | number | true
@@ -26,6 +26,19 @@ export const useAppController = () => {
       user: resUser?.data?.data || null,
     }))
   }, [])
+
+  const logoutUser = useCallback(async () => {
+    const resLogout = await API.logoutUser.query()
+    const success = resLogout?.data?.success
+    if (success) {
+      alert('Logout Successfull')
+      setData((current) => ({ ...current, user: null, tasks: [] }))
+      navigate('/login')
+    } else {
+      console.log('logutRes', resLogout)
+      alert('Error logout')
+    }
+  }, [navigate])
 
   const getTasks = useCallback(async () => {
     const resTasks = await API.getTasks.query()
@@ -126,6 +139,7 @@ export const useAppController = () => {
       verifyGoogleOauth,
       navigateToGoogleLogin,
       createOrEditTask,
+      logoutUser,
     }
   }, [
     getTasks,
@@ -134,6 +148,7 @@ export const useAppController = () => {
     navigateToGoogleLogin,
     deleteTask,
     createOrEditTask,
+    logoutUser,
   ])
 
   return { data, actions, ui, setUi }
