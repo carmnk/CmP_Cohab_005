@@ -95,7 +95,6 @@ export const useAppController = () => {
         const resDeletion = await API.deleteTask(task_id).query()
         if (resDeletion.data?.success) {
           console.log(resDeletion)
-          // alert("Task successfully deleted");
           getTasks()
         } else {
           throw resDeletion
@@ -121,7 +120,7 @@ export const useAppController = () => {
         : API.createTask.query
       const resQuery = await query(formData)
       if (resQuery?.data?.success) {
-        alert('Successfully saved')
+        // alert('Successfully saved')
         setUi((current) => ({ ...current, tasksModal: null }))
         await getTasks()
       } else {

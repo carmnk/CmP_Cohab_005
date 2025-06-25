@@ -24,6 +24,16 @@ export const API = {
       `api/v1/apps/cohab/groupname/${group_id}`,
       'PUT'
     ),
+  changeGroupAdmin: (group_id: number) =>
+    makeApiQuery<{ group_admin_user_id: number }, any>(
+      `api/v1/apps/cohab/groupadmin/${group_id}`,
+      'PUT'
+    ),
+  removeUserFromGroup: (group_id: number, user_id: number) =>
+    makeApiQuery<never, any>(
+      `api/v1/apps/cohab/group/${group_id}/remove/${user_id}`,
+      'DELETE'
+    ),
 
   logoutUser: makeApiQuery<never, any>('api/v1/apps/cohab/user/logout', 'POST'),
   getTasks: makeApiQuery<never, any>('api/v1/apps/cohab/tasks'),

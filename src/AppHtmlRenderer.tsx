@@ -20,6 +20,9 @@ import { TasksSection } from './components/IndexTasksSection'
 import { SchedulesSection } from './components/IndexSchedulesSection'
 import { useAppController } from './appController/useAppController'
 import { UsersYouSection } from './components/UsersYouSection'
+import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid'
+import { Box } from '@mui/material'
+import { TasksTableSection } from './components/TasksTableSection'
 
 declare const BASE_URL: string
 
@@ -65,6 +68,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     setUi((current) => ({ ...current, tasksModal: null }))
   }, [])
   const handleOpenEditTaskModal = useCallback((task_id: number) => {
+    console.log('handleOpenEditTaskModal', task_id)
     setUi((current) => ({ ...current, tasksModal: task_id }))
   }, [])
 
@@ -221,8 +225,19 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
       ] = <GroupDetails data={data} updateUser={getUser} />
     }
 
-    staticInjections.elements['ce3acc38-6f07-4021-9691-6470d0679ceb'] =
-      taskTableDef(data, handleOpenEditTaskModal, deleteTask)
+    // staticInjections.elements['ce3acc38-6f07-4021-9691-6470d0679ceb'] =
+    //   taskTableDef(data, handleOpenEditTaskModal, deleteTask, createOrEditTask)
+    staticInjections.elementReplacementComponent[
+      'f7e36ae8-7fcf-45a5-a5da-06e4e8c43978'
+    ] = (
+      <TasksTableSection
+        data={data}
+        deleteTask={deleteTask}
+        createOrEditTask={createOrEditTask}
+        openTaskModal={handleOpenEditTaskModal}
+        openNewTaskModal={handleOpenNewTaskModal}
+      />
+    )
 
     return staticInjections
   }, [
@@ -234,6 +249,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     deleteTask,
     getUser,
     logoutUser,
+    createOrEditTask,
   ])
 
   useEffect(() => {
@@ -294,6 +310,34 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
           onConfirm={createOrEditTask}
         />
       )}
+      {/* <Box
+        // display="none"
+        position="fixed"
+        zIndex={10000000000}
+        top={0}
+        left={0}
+        overflow="auto"
+        width="100%"
+        height="100%"
+      >
+        <Box width="100%" minWidth={520} height="100%">
+          <DataGrid
+            autosizeOnMount
+            autosizeOptions={{ expand: true }}
+            rows={data?.tasks ?? []}
+            getRowId={(row) => row.task_id}
+            columns={
+              taskTableDef(
+                data,
+                handleOpenEditTaskModal,
+                deleteTask,
+                createOrEditTask
+              )?.columns as any[]
+            }
+            disableColumnSelector={true}
+          />
+        </Box>
+      </Box> */}
     </>
   ) : null
 }

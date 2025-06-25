@@ -1,5 +1,5 @@
 import { Flex, CTextField, Button, Table } from '@cmk/fe_utils'
-import { Box, Typography, useTheme } from '@mui/material'
+import { Box, Menu, Typography, useTheme } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { Icon } from '@mdi/react'
 import {
@@ -43,6 +43,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
   })
   const [ui, setUi] = useState({
     isEditUserName: false,
+    openEditUserMenu: false,
   })
 
   const handleToggleEditUserName = useCallback(() => {
@@ -145,9 +146,61 @@ export const GroupDetails = (props: GroupDetailsProps) => {
 
   const hasUserGroup = !!data?.user?.groups?.length
 
+  const handleRemoveUserFromGroup = useCallback(
+    async (removeUserId: number) => {
+      if (!removeUserId) {
+        return
+      }
+      try {
+        const resDeletion = await API.removeUserFromGroup(
+          userGroup?.group_id,
+          removeUserId
+        ).query()
+        if (resDeletion.data?.success) {
+          console.log(resDeletion)
+          updateUser?.()
+        } else {
+          throw resDeletion
+        }
+      } catch (e) {
+        console.error(e)
+        alert('An error has occurred while removing the user from the group')
+      }
+    },
+    [updateUser, userGroup]
+  )
+  const handleMakeUserNewGroupAdmin = useCallback(
+    async (newAdminUserId: number) => {
+      if (!newAdminUserId) {
+        return
+      }
+      try {
+        const resChangeAdmin = await API.changeGroupAdmin(
+          userGroup?.group_id
+        ).query({
+          group_admin_user_id: newAdminUserId,
+        })
+        if (resChangeAdmin.data?.success) {
+          console.log(resChangeAdmin)
+          updateUser?.()
+        } else {
+          throw resChangeAdmin
+        }
+      } catch (e) {
+        console.error(e)
+        alert('An error has occurred while removing the user from the group')
+      }
+    },
+    [updateUser, userGroup]
+  )
+
   const tableDef = useMemo(() => {
-    return usersTableDef(data)
-  }, [data])
+    return usersTableDef({
+      data,
+      removeUserFromGroup: handleRemoveUserFromGroup,
+      makeUserNewGroupAdmin: handleMakeUserNewGroupAdmin,
+    })
+  }, [data, handleRemoveUserFromGroup, handleMakeUserNewGroupAdmin])
 
   return (
     <Box mt={'1rem'} minHeight="8rem">
@@ -204,7 +257,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       {hasUserGroup && <Table {...tableDef} />}
 
       {(!hasUserGroup || isGroupAdmin) && (
-        <Box mt={1}>
+        <Box mt={isGroupAdmin ? 2 : 1}>
           {invitations?.length ? (
             <Box>
               <Flex alignItems="flex-start" gap={1} mb={1}>
