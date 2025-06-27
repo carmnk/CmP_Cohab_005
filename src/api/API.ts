@@ -50,6 +50,10 @@ export const API = {
     { group_invitation_id: number },
     { success: boolean }
   >('api/v1/apps/cohab/group/invition/reply', 'POST'),
+  getDataChanges: makeApiQuery<
+    never,
+    { data: { user_changes: any[]; data_changes: any[] } }
+  >('api/v1/apps/cohab/changes'),
 }
 
 // TODO ADD Satisfy type condition

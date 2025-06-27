@@ -6,6 +6,10 @@ import { getGoogleOauthLoginLink } from '../api/googleLink'
 
 export const useAppController = () => {
   const [data, setData] = useState({ user: null as any, tasks: [] as any[] })
+  const [dataChanges, setDataChanges] = useState({
+    userChanges: [] as any[],
+    dataChanges: [] as any[],
+  })
   const [ui, setUi] = useState<{
     initialized: boolean
     tasksModal: null | number | true
@@ -130,6 +134,16 @@ export const useAppController = () => {
     [getTasks]
   )
 
+  const getDataChanges = useCallback(async () => {
+    const resChanges = await API.getDataChanges.query()
+    console.log('resChanges', resChanges)
+    const { user_changes, data_changes } = resChanges?.data?.data || {}
+    setDataChanges({
+      userChanges: user_changes || [],
+      dataChanges: data_changes || [],
+    })
+  }, [])
+
   const actions = useMemo(() => {
     return {
       getTasks,
@@ -139,6 +153,7 @@ export const useAppController = () => {
       navigateToGoogleLogin,
       createOrEditTask,
       logoutUser,
+      getDataChanges,
     }
   }, [
     getTasks,
@@ -148,7 +163,8 @@ export const useAppController = () => {
     deleteTask,
     createOrEditTask,
     logoutUser,
+    getDataChanges,
   ])
 
-  return { data, actions, ui, setUi }
+  return { data, actions, dataChanges, ui, setUi }
 }

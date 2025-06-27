@@ -8,7 +8,7 @@ import {
 import { Box, Typography } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { formatUserName } from '../utils/formatUsername'
-import { CDateTimePicker } from './DateTimePicker'
+import { CDateTimePicker } from '../components/DateTimePicker'
 import moment, { Moment } from 'moment'
 
 const taskStatusValues = ['open', 'completed']

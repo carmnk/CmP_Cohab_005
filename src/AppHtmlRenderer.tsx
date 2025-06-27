@@ -11,18 +11,18 @@ import {
 import axios from 'axios'
 import { UserImage } from './components/UserImage'
 import { QUERY_METHOD } from './api/00_utils/httpQuery'
-import { GroupDetails } from './components/UsersGroupDetails'
+import { GroupDetails } from './views/UsersGroupDetails'
 import { formatUserName } from './utils/formatUsername'
-import { TaskModal } from './components/TaskModal'
-import { taskTableDef } from './components/tableDefs/taskTableDef'
-import { UpdatesSection } from './components/IndexUpdatesSection'
-import { TasksSection } from './components/IndexTasksSection'
-import { SchedulesSection } from './components/IndexSchedulesSection'
+import { TaskModal } from './views/TaskModal'
+import { taskTableDef } from './views/tableDefs/taskTableDef'
+import { UpdatesSection } from './views/IndexUpdatesSection'
+import { TasksSection } from './views/IndexTasksSection'
+import { SchedulesSection } from './views/IndexSchedulesSection'
 import { useAppController } from './appController/useAppController'
-import { UsersYouSection } from './components/UsersYouSection'
+import { UsersYouSection } from './views/UsersYouSection'
 import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid'
 import { Box } from '@mui/material'
-import { TasksTableSection } from './components/TasksTableSection'
+import { TasksTableSection } from './views/TasksTableSection'
 
 declare const BASE_URL: string
 
@@ -47,7 +47,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     initialEditorState: appData as any,
   })
 
-  const { actions, data, ui, setUi } = useAppController()
+  const { actions, data, ui, setUi, dataChanges } = useAppController()
   const {
     getUser,
     // getTasks,
@@ -56,6 +56,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     createOrEditTask,
     verifyGoogleOauth,
     logoutUser,
+    getDataChanges,
   } = actions
 
   const [iconData, setIconData] = React.useState<Record<string, string>>({})
@@ -102,8 +103,11 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
 
     fetchIconData()
     verifyGoogleOauth()
+    getDataChanges()
     // getTasks();
   }, [verifyGoogleOauth])
+
+  console.log("'AppHtmlRenderer DATA CHANGES'", dataChanges)
 
   const getIcon = useCallback(
     async (name: string) => {
@@ -175,8 +179,11 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
           },
         },
         '29dc4c34-6f8a-40bb-bfcc-d8ccb0f0bada': {
-          disabled: true,
-          tooltip: '*Coming soon*',
+          // disabled: true,
+          // tooltip: '*Coming soon*',
+          onClick: () => {
+            navigate('/data_changes')
+          },
         },
         '5705cdc6-65e7-47fa-8f4c-eb51817e1a2f': {
           disabled: true,
@@ -229,6 +236,17 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     //   taskTableDef(data, handleOpenEditTaskModal, deleteTask, createOrEditTask)
     staticInjections.elementReplacementComponent[
       'f7e36ae8-7fcf-45a5-a5da-06e4e8c43978'
+    ] = (
+      <TasksTableSection
+        data={data}
+        deleteTask={deleteTask}
+        createOrEditTask={createOrEditTask}
+        openTaskModal={handleOpenEditTaskModal}
+        openNewTaskModal={handleOpenNewTaskModal}
+      />
+    )
+    staticInjections.elementReplacementComponent[
+      '0a57abc0-2c4d-47a2-b01f-22e5d2867c81'
     ] = (
       <TasksTableSection
         data={data}
