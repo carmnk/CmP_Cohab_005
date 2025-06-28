@@ -5,10 +5,14 @@ import { v4 as uuidv4 } from 'uuid'
 import { getGoogleOauthLoginLink } from '../api/googleLink'
 
 export const useAppController = () => {
-  const [data, setData] = useState({ user: null as any, tasks: [] as any[] })
+  const [data, setData] = useState({
+    user: null as any,
+    tasks: [] as any[],
+    schedules: [] as any[],
+  })
   const [dataChanges, setDataChanges] = useState({
-    userChanges: [] as any[],
-    dataChanges: [] as any[],
+    user_changes: [] as any[],
+    data_changes: [] as any[],
   })
   const [ui, setUi] = useState<{
     initialized: boolean
@@ -52,6 +56,16 @@ export const useAppController = () => {
       tasks: tasks,
     }))
     console.log('resTasks', resTasks, 'tasks', tasks)
+  }, [])
+
+  const getSchedules = useCallback(async () => {
+    const resSchedules = await API.getSchedules.query()
+    const schedules = resSchedules?.data?.data || []
+    setData((prev: any) => ({
+      ...prev,
+      schedules: schedules,
+    }))
+    console.log('resSchedules', resSchedules, 'schedules', schedules)
   }, [])
 
   const verifyGoogleOauth = useCallback(async () => {
@@ -139,14 +153,15 @@ export const useAppController = () => {
     console.log('resChanges', resChanges)
     const { user_changes, data_changes } = resChanges?.data?.data || {}
     setDataChanges({
-      userChanges: user_changes || [],
-      dataChanges: data_changes || [],
+      user_changes: user_changes || [],
+      data_changes: data_changes || [],
     })
   }, [])
 
   const actions = useMemo(() => {
     return {
       getTasks,
+      getSchedules,
       deleteTask,
       getUser,
       verifyGoogleOauth,
@@ -157,6 +172,7 @@ export const useAppController = () => {
     }
   }, [
     getTasks,
+    getSchedules,
     getUser,
     verifyGoogleOauth,
     navigateToGoogleLogin,

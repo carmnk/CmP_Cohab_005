@@ -12,17 +12,15 @@ import axios from 'axios'
 import { UserImage } from './components/UserImage'
 import { QUERY_METHOD } from './api/00_utils/httpQuery'
 import { GroupDetails } from './views/UsersGroupDetails'
-import { formatUserName } from './utils/formatUsername'
 import { TaskModal } from './views/TaskModal'
-import { taskTableDef } from './views/tableDefs/taskTableDef'
 import { UpdatesSection } from './views/IndexUpdatesSection'
 import { TasksSection } from './views/IndexTasksSection'
 import { SchedulesSection } from './views/IndexSchedulesSection'
 import { useAppController } from './appController/useAppController'
 import { UsersYouSection } from './views/UsersYouSection'
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid'
-import { Box } from '@mui/material'
 import { TasksTableSection } from './views/TasksTableSection'
+import { UpdatesTableSection } from './views/UpdatesTableSection'
+import { SchedulesTableSection } from './views/SchedulesTableSection'
 
 declare const BASE_URL: string
 
@@ -50,7 +48,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
   const { actions, data, ui, setUi, dataChanges } = useAppController()
   const {
     getUser,
-    // getTasks,
+    getSchedules,
     deleteTask,
     navigateToGoogleLogin,
     createOrEditTask,
@@ -185,16 +183,18 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
             navigate('/data_changes')
           },
         },
-        '5705cdc6-65e7-47fa-8f4c-eb51817e1a2f': {
-          disabled: true,
-          tooltip: '*Coming soon*',
-        },
+        // '5705cdc6-65e7-47fa-8f4c-eb51817e1a2f': {
+        //   disabled: true,
+        //   tooltip: '*Coming soon*',
+        // },
         '1f787593-7b1d-4778-9844-dc9c08d5baf0': {
           onClick: logoutUser,
         },
       },
       elementReplacementComponent: {
-        '7462cee5-9dc8-452b-a9d2-70c978792a1e': <UpdatesSection data={data} />,
+        '7462cee5-9dc8-452b-a9d2-70c978792a1e': (
+          <UpdatesSection data={data} dataChanges={dataChanges} />
+        ),
         'b7cb6846-684e-4614-a60e-eb4eac5a8f4a': <TasksSection data={data} />,
         'd8a9b6ed-41fd-4fae-b0c5-08fd1f5517d2': (
           <SchedulesSection data={data} />
@@ -235,6 +235,17 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     // staticInjections.elements['ce3acc38-6f07-4021-9691-6470d0679ceb'] =
     //   taskTableDef(data, handleOpenEditTaskModal, deleteTask, createOrEditTask)
     staticInjections.elementReplacementComponent[
+      'e73e34c5-3342-4b88-8073-a05ed8b968a4'
+    ] = (
+      <SchedulesTableSection
+        data={data}
+        deleteTask={deleteTask}
+        createOrEditTask={createOrEditTask}
+        openTaskModal={handleOpenEditTaskModal}
+        openNewTaskModal={handleOpenNewTaskModal}
+      />
+    )
+    staticInjections.elementReplacementComponent[
       'f7e36ae8-7fcf-45a5-a5da-06e4e8c43978'
     ] = (
       <TasksTableSection
@@ -248,12 +259,13 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     staticInjections.elementReplacementComponent[
       '0a57abc0-2c4d-47a2-b01f-22e5d2867c81'
     ] = (
-      <TasksTableSection
+      <UpdatesTableSection
         data={data}
         deleteTask={deleteTask}
         createOrEditTask={createOrEditTask}
         openTaskModal={handleOpenEditTaskModal}
         openNewTaskModal={handleOpenNewTaskModal}
+        dataChanges={dataChanges}
       />
     )
 
@@ -268,6 +280,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     getUser,
     logoutUser,
     createOrEditTask,
+    dataChanges,
+    navigate,
   ])
 
   useEffect(() => {
@@ -298,6 +312,10 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
       setUserImage(null)
     }
   }, [data?.user?.photo_url])
+
+  useEffect(() => {
+    getSchedules()
+  }, [])
 
   return ui.initialized ? (
     <>

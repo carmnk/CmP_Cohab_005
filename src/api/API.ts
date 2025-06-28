@@ -42,6 +42,9 @@ export const API = {
     makeApiQuery<never, any>('api/v1/apps/cohab/task/' + task_id, 'PUT'),
   deleteTask: (task_id: number) =>
     makeApiQuery<never, any>('api/v1/apps/cohab/task/' + task_id, 'DELETE'),
+
+  getSchedules: makeApiQuery<never, any>('api/v1/apps/cohab/schedules'),
+
   sendGroupInvitation: makeApiQuery<
     { invitee_email: string },
     { success: boolean }
