@@ -519,13 +519,14 @@ export const TaskModal = (props: TaskModalProps) => {
     [task_id, data?.tasks]
   )
 
-  console.log(
-    'TaskModal',
-    task_id,
-    formData,
-    recursiveSubTasks,
-    recursiveParentTasks
-  )
+  const scrollDown = useCallback(() => {
+    const element = document.querySelector('.MuiDialogContent-root')
+    element?.scrollTo(0, element?.scrollHeight)
+  }, [[]])
+
+  useEffect(() => {
+    scrollDown?.()
+  }, [data?.tasks, scrollDown])
 
   return (
     <Modal
@@ -619,7 +620,8 @@ export const TaskModal = (props: TaskModalProps) => {
             <Button
               borderRadius={9999}
               label={
-                ui?.showOnlyOpenSubtasks ? 'Show all Tasks' : 'Show only open'
+                // ui?.showOnlyOpenSubtasks ?
+                'Only Open Tasks'
               }
               icon={ui?.showOnlyOpenSubtasks ? mdiFilterOff : mdiFilter}
               size="small"
@@ -735,6 +737,7 @@ export const TaskModal = (props: TaskModalProps) => {
               <AddTaskTreeItem
                 parent_task_id={task_id as number}
                 onSubmitNewTask={handleSubmitNewTask}
+                // onFocus={subTasksscrollContainerRef}
               />
             </Box>
           ) : (
