@@ -1,29 +1,16 @@
-import { Box, Chip, Typography } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
-import { useCallback, useMemo } from 'react'
-import { Button, Flex } from '@cmk/fe_utils'
+import { Box, Typography } from '@mui/material'
+import { useMemo } from 'react'
+import { Button } from '@cmk/fe_utils'
 import { mdiOpenInNew } from '@mdi/js'
+import { AppControllerData } from '../../appController/types/appControllerData'
 
 export type TasksSectionProps = {
-  data: any
+  data: AppControllerData
 }
-declare const BASE_URL: string
 
 export const TasksSection = (props: TasksSectionProps) => {
   const { data } = props
   const tasks = data?.tasks
-  // const groupMembers = data?.user?.groups?.[0]?.group_members
-
-  const navigateRaw = useNavigate()
-  const navigate = useCallback(
-    (to: string) => {
-      const toAdj = to.startsWith('/') ? to.slice(1) : to
-      const destination = BASE_URL + toAdj
-      console.log('navigate', to, 'toAdj', toAdj, 'destination', destination)
-      navigateRaw(destination)
-    },
-    [navigateRaw]
-  )
 
   const privateTasks = useMemo(() => {
     return tasks.filter((task) => !task?.owner_group_id)
@@ -52,7 +39,7 @@ export const TasksSection = (props: TasksSectionProps) => {
             {privateTasks.filter((task) => task.task_status === 'open')?.length}
             )
           </Typography>
-          <Typography>overdue: (?...)</Typography>
+          {/* <Typography>overdue: (?...)</Typography> */}
         </Box>
         <Box>
           <Button
@@ -70,7 +57,7 @@ export const TasksSection = (props: TasksSectionProps) => {
             open: (
             {groupTasks.filter((task) => task.task_status === 'open')?.length})
           </Typography>
-          <Typography>overdue: (?...)</Typography>
+          {/* <Typography>overdue: (?...)</Typography> */}
         </Box>
         <Box>
           <Button

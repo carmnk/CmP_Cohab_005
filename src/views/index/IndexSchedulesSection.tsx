@@ -1,7 +1,8 @@
 import { Typography } from '@mui/material'
+import { AppControllerData } from '../../appController/types/appControllerData'
 
 export type TasksSectionProps = {
-  data: any
+  data: AppControllerData
 }
 declare const BASE_URL: string
 

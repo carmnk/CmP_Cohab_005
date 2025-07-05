@@ -1,20 +1,23 @@
-import { Avatar, Box, Chip, Stack, Typography } from '@mui/material'
-import { formatUserName } from '../utils/formatUsername'
+import { Avatar, Box, Typography } from '@mui/material'
+import { formatUserName } from '../../utils/formatUsername'
 import { useCallback, useState } from 'react'
 import { Button, ColorPicker, CTextField, Flex } from '@cmk/fe_utils'
 import { mdiCheck, mdiPencil } from '@mdi/js'
-import { API } from '../api/API'
-import { getUserInitials } from '../utils/getUserInitials'
+import { API } from '../../api/API'
+import { getUserInitials } from '../../utils/getUserInitials'
+import { AppControllerData } from '../../appController/types/appControllerData'
+import { CAvatar } from '../../components/CAvatar'
 
 export type UsersYouSectionProps = {
-  data: any
+  data: AppControllerData
   userImageSrc: string | null
   updateUser?: () => Promise<void>
+  disableEdit?: boolean
 }
-declare const BASE_URL: string
+// declare const BASE_URL: string
 
 export const UsersYouSection = (props: UsersYouSectionProps) => {
-  const { data, userImageSrc, updateUser } = props
+  const { data, userImageSrc, updateUser, disableEdit } = props
   const user = data?.user
 
   const [formData, setFormData] = useState({
@@ -66,15 +69,12 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
           user_color: newValue,
         })
         updateUser?.()
-        // setUi((current) => ({ ...current, isEditUse rName: false }))
       } catch (e) {
         alert('error changing Username')
         setFormData((current) => ({
           ...current,
-          // user_name: formatUserName(user),
-          user_color: user?.user_color,
+          user_color: user?.user_color as string,
         }))
-        // setUi((current) => ({ ...current, isEditUserName: false }))
       }
     },
     [updateUser, user]
@@ -84,9 +84,11 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
     <Box>
       <Flex width={'100%'} gap={'3rem'}>
         <Box>
-          <Typography variant="h6" fontWeight="bold">
-            You
-          </Typography>
+          {!disableEdit && (
+            <Typography variant="h6" fontWeight="bold">
+              You
+            </Typography>
+          )}
           <Box mt={1}>
             {ui.isEditUserName ? (
               <Flex alignItems="center" mb={'0.5rem'} gap="0.5rem">
@@ -109,51 +111,69 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
             ) : (
               <Flex alignItems="center" gap={'1rem'} mb={'0.5rem'}>
                 <Typography>{formData?.user_name}</Typography>
-                <Button
-                  iconButton
-                  icon={mdiPencil}
-                  variant="outlined"
-                  onClick={handleToggleEditUserName}
-                />
+                {!disableEdit && (
+                  <Button
+                    iconButton
+                    icon={mdiPencil}
+                    variant="outlined"
+                    onClick={handleToggleEditUserName}
+                  />
+                )}
               </Flex>
             )}
             <Typography>{user?.email}</Typography>
             <Flex mt={'1rem'} alignItems="center" gap="0.5rem">
               <Typography variant="body1">User Color</Typography>
-              <ColorPicker
-                value={user?.user_color}
-                disableThemeColors
-                onChange={handleSubmitChangeUserColor}
-              />
-              <Typography variant="body2" fontStyle="italic">
-                Preview
-              </Typography>
-              <Avatar
+              {!disableEdit && (
+                <>
+                  <ColorPicker
+                    value={user?.user_color}
+                    disableThemeColors
+                    onChange={handleSubmitChangeUserColor}
+                    disabled={disableEdit}
+                  />
+                  <Typography variant="body2" fontStyle="italic">
+                    Preview
+                  </Typography>
+                </>
+              )}
+              <CAvatar
                 sx={{
-                  background: user?.user_color,
-                  width: 30,
-                  height: 30,
+                  // background: user?.user_color,
+                  // width: 30,
+                  // height: 30,
                   ml: '0.5rem',
                 }}
-              >
-                {user?.user_name && getUserInitials?.(user)}
-              </Avatar>
+                user={user}
+              />
             </Flex>
           </Box>
         </Box>
 
-        <Box
-          mt="1rem"
-          height="4rem"
-          width="4rem"
-          overflow="hidden"
-          borderRadius={9999}
-          border={`5px solid ${user?.user_color ?? '#666'}`}
-        >
-          {userImageSrc && userImageSrc.startsWith('data:image') && (
-            <img src={userImageSrc} alt="user" width={64} height={64} />
-          )}
-        </Box>
+        {!disableEdit && (
+          <Box
+            mt="1rem"
+            height="4rem"
+            width="4rem"
+            overflow="hidden"
+            borderRadius={9999}
+            border={`5px solid ${user?.user_color ?? '#666'}`}
+          >
+            {userImageSrc && userImageSrc.startsWith('data:image') ? (
+              <img src={userImageSrc} alt="user" width={64} height={64} />
+            ) : (
+              <CAvatar
+                sx={{
+                  width: 'calc(4rem - 10px)',
+                  height: 'calc(4rem - 10px)',
+                  // background: user?.user_color,
+                  fontSize: '2rem',
+                }}
+                user={user}
+              />
+            )}
+          </Box>
+        )}
       </Flex>
     </Box>
   )

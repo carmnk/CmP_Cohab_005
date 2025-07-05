@@ -1,5 +1,5 @@
 import { Flex, CTextField, Button, Table } from '@cmk/fe_utils'
-import { Box, Menu, Typography, useTheme } from '@mui/material'
+import { Box, Typography, useTheme } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { Icon } from '@mdi/react'
 import {
@@ -8,12 +8,13 @@ import {
   mdiEmailFastOutline,
   mdiPencil,
 } from '@mdi/js'
-import { API } from '../api/API'
-import { formatUserName } from '../utils/formatUsername'
-import { usersTableDef } from './tableDefs/usersTableDef'
+import { API } from '../../api/API'
+import { formatUserName } from '../../utils/formatUsername'
+import { usersTableDef } from '../tableDefs/usersTableDef'
+import { AppControllerData } from '../../appController/types/appControllerData'
 
 export type GroupDetailsProps = {
-  data?: any
+  data: AppControllerData
   updateUser?: () => Promise<void>
 }
 
@@ -119,10 +120,13 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       alert('Grouname must not be empty')
       return
     }
+    if (!userGroup?.group_id) {
+      return
+    }
     try {
       const resChangeQuerry = await API.changeGroupName(
         userGroup?.group_id
-      ).query(groupFormData)
+      ).query(groupFormData as any)
       updateUser?.()
       setUi((current) => ({ ...current, isEditUserName: false }))
     } catch (e) {
@@ -148,7 +152,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
 
   const handleRemoveUserFromGroup = useCallback(
     async (removeUserId: number) => {
-      if (!removeUserId) {
+      if (!removeUserId || !userGroup?.group_id) {
         return
       }
       try {
@@ -171,7 +175,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
   )
   const handleMakeUserNewGroupAdmin = useCallback(
     async (newAdminUserId: number) => {
-      if (!newAdminUserId) {
+      if (!newAdminUserId || !userGroup?.group_id) {
         return
       }
       try {
@@ -215,7 +219,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
               <CTextField
                 label="Change Group Name"
                 size="small"
-                value={groupFormData.group_name}
+                value={groupFormData?.group_name ?? ''}
                 onChange={handleChangeGroupname}
               />
               <Button

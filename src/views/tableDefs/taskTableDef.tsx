@@ -1,7 +1,6 @@
 import { AlertDialog, Button, Checkbox, Flex } from '@cmk/fe_utils'
 import {
   mdiAccountGroup,
-  mdiCalendarAlert,
   mdiCalendarAlertOutline,
   mdiCheck,
   mdiDelete,
@@ -25,12 +24,14 @@ import { formatUserName } from '../../utils/formatUsername'
 import { useCallback, useRef, useState } from 'react'
 import Icon from '@mdi/react'
 import { getUserInitials } from '../../utils/getUserInitials'
-import { Task } from '../TaskModal'
 import moment from 'moment'
 import { GridFilterOperator } from '@mui/x-data-grid'
+import { AppControllerData } from '../../appController/types/appControllerData'
+import { Task } from '../../appController/types/tasks'
+import { CAvatar } from '../../components/CAvatar'
 
 export const taskTableDef = (
-  data: any,
+  data: AppControllerData,
   openTaskModal: (task_id: number) => void,
   deleteTask: (task_id: number) => void,
   createOrEditTask: (task: Task) => Promise<void>
@@ -120,9 +121,9 @@ export const taskTableDef = (
         }
       },
     },
-    ...(data?.user?.groups?.map((group) => ({
+    ...(data?.user?.groups?.map?.((group) => ({
       label: group.group_name ?? 'Your Group (unnamed)',
-      value: group.group_id,
+      value: group.group_id as any,
       getApplyFilterFn: (filterItem, column) => {
         if (!filterItem.field || !filterItem.operator) {
           return null
@@ -138,14 +139,47 @@ export const taskTableDef = (
     data: data?.tasks, //[{ column1: "ABCD", column2: "EFGH" }],
     columns: [
       {
+        disableReorder: true,
+        hideSortIcons: true,
+        hideable: false,
+        sortable: false,
+        filterOperators: statusFilterOperators,
+        field: 'field_status',
+        key: 'field_status',
+        headerName: 'Done',
+        minWidth: 60,
+        flex: 1,
+        renderCell: (cellProps) => {
+          const item = cellProps?.row
+          return (
+            <Flex
+              justifyContent="center"
+              alignItems="center"
+              key={'field_status'}
+            >
+              <Checkbox
+                disableLabel
+                disableHelperText
+                value={item?.task_status === 'completed'}
+                checked={item?.task_status === 'completed'}
+                onChange={(newValue) => handleChangeTaskStatus(newValue, item)}
+                slotProps={{ formControlLabel: { sx: { m: 0 } } as any }}
+              />
+            </Flex>
+          )
+        },
+      },
+      {
         field: 'task_name',
+        key: 'task_name',
         flex: 8,
+        // minWidth: 80,
         headerName: 'Name',
         renderCell: (cellProps) => {
           const item = cellProps?.row
 
           return (
-            <Box>
+            <Box key={'task_name'}>
               <Typography>{item?.task_name ?? '-'}</Typography>
               {item?.due_datetime && (
                 <Flex alignItems="center" gap={'0.125rem'}>
@@ -159,32 +193,15 @@ export const taskTableDef = (
           )
         },
       },
-      // {
-      //   // sortKey: "email",
-      //   // filterKey: "column1",
-      //   style: { width: "3.5rem" },
-      //   header: "Private",
-      //   renderCell: (item, iIdx) => {
-      //     return (
-      //       <td key={iIdx}>
-      //         <Flex justifyContent="center" alignItems="center">
-      //           {!item?.owner_group_id && (
-      //             <Icon path={mdiCheck} size={1} color="limegreen" />
-      //           )}
-      //         </Flex>
-      //       </td>
-      //     );
-      //   },
-      // },
       {
-        // sortKey: "email",
-        // filterKey: "column1",
         headerName: 'Created',
         field: 'creator_user_id',
+        key: 'creator_user_id',
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
-        minWidth: 72,
+        maxWidth: 80,
+        width: 80,
         flex: 1,
         headerAlign: 'center',
         renderHeader: () => (
@@ -200,24 +217,15 @@ export const taskTableDef = (
           const creatorUser = groupMembers?.find?.(
             (memb) => memb.user_id === item?.owner_user_id
           )
-          // const label = creatorUser ? formatUserName(creatorUser)?.[0] : '?'
           return (
-            <Box height="100%">
+            <Box height="100%" key={'creator_user_id'}>
               <Flex alignItems="center" justifyContent="center" height="100%">
                 <Tooltip
                   title={formatUserName(creatorUser)}
                   placement="top"
                   arrow
                 >
-                  <Avatar
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      background: creatorUser?.user_color,
-                    }}
-                  >
-                    {creatorUser && getUserInitials(creatorUser)}
-                  </Avatar>
+                  <CAvatar size={32} user={creatorUser} />
                 </Tooltip>
               </Flex>
             </Box>
@@ -225,8 +233,6 @@ export const taskTableDef = (
         },
       },
       {
-        // sortKey: "email",
-        // filterKey: "column1",
         disableReorder: true,
         hideSortIcons: true,
         hideable: false,
@@ -234,6 +240,7 @@ export const taskTableDef = (
         filterable: false,
         disableColumnMenu: true,
         field: 'editors_user_ids',
+        key: 'editors_user_ids',
         style: { width: '3rem' },
         minWidth: 80,
         flex: 1,
@@ -253,9 +260,8 @@ export const taskTableDef = (
           const editorUsers = editorUserIds.map((eUserId) =>
             groupMembers?.find((memb) => memb.user_id === eUserId)
           )
-          // const label = creatorUser ? formatUserName(creatorUser)?.[0] : "?";
           return (
-            <Box>
+            <Box key={'editors_user_ids'}>
               <Tooltip
                 title={editorUsers
                   .map((user) => formatUserName(user))
@@ -270,16 +276,17 @@ export const taskTableDef = (
                 >
                   <Flex alignItems="center" justifyContent="center">
                     {editorUsers.slice(0, 2).map((eUser, eIdx) => (
-                      <Avatar
+                      <CAvatar
+                        user={eUser}
+                        size={32}
+                        key={eIdx}
                         sx={{
-                          width: 32,
-                          height: 32,
+                          // width: 32,
+                          // height: 32,
                           ml: eIdx ? -2 : undefined,
-                          bgcolor: eUser?.user_color,
+                          // bgcolor: eUser?.user_color,
                         }}
-                      >
-                        {eUser && getUserInitials(eUser)}
-                      </Avatar>
+                      />
                     ))}
                   </Flex>
                 </Badge>
@@ -289,14 +296,13 @@ export const taskTableDef = (
         },
       },
       {
-        // sortKey: "email",
-        // filterKey: "column1",
         hideable: false,
         sortable: false,
         field: 'group_id',
+        key: 'group_id',
         headerName: 'Group',
         filterOperators: groupFilterOperators,
-        minWidth: 85,
+        minWidth: 32,
         flex: 1,
         header: (
           <Flex justifyContent="center" alignItems="center">
@@ -309,104 +315,39 @@ export const taskTableDef = (
           const item = cellProps?.row
 
           return (
-            <Box height="100%">
+            <Box height="100%" key={'group_id'}>
               <Flex alignItems="center" justifyContent="center" height="100%">
-                {item?.owner_group_id && (
-                  // <Button
-                  //   iconButton
-                  //   variant="outlined"
-                  //   icon={mdiAccountGroup}
-                  //   size={'small'}
-                  //   color="success"
-                  //   tooltip={
-                  //     item?.owner_group_id
-                  //       ? data?.user?.groups?.find(
-                  //           (gr) => gr.group_id === item?.owner_group_id
-                  //         )?.group_name
-                  //       : 'Your group (unnamed)'
-                  //   }
-                  // />
-
-                  <Icon path={mdiCheck} size={1} />
-                )}
+                {item?.owner_group_id && <Icon path={mdiCheck} size={1} />}
               </Flex>
             </Box>
           )
         },
       },
-      // {
-      //   // sortKey: "email",
-      //   // filterKey: "column1",
-      //   style: { width: '5rem' },
-      //   header: (
-      //     <Flex justifyContent="center" alignItems="center">
-      //       <Typography>Status</Typography>
-      //     </Flex>
-      //   ),
-      //   renderCell: (item, iIdx) => {
-      //     return (
-      //       <td key={iIdx}>
-      //         <Flex alignItems="center" justifyContent="center">
-      //           {item?.task_status === 'completed' ? (
-      //             <Icon path={mdiCheck} size={1} />
-      //           ) : (
-      //             item?.task_status
-      //           )}
-      //         </Flex>
-      //       </td>
-      //     )
-      //   },
-      // },
-      {
-        // sortKey: "name",
-        // filterKey: "column1",
-        disableReorder: true,
-        hideSortIcons: true,
-        hideable: false,
-        sortable: false,
-        filterOperators: statusFilterOperators,
-        field: 'field_status',
-        headerName: 'Done',
-        minWidth: 60,
-        flex: 1,
-        renderCell: (cellProps) => {
-          const item = cellProps?.row
-          return (
-            <Flex justifyContent="center" alignItems="center">
-              <Checkbox
-                disableLabel
-                disableHelperText
-                value={item?.task_status === 'completed'}
-                checked={item?.task_status === 'completed'}
-                onChange={(newValue) => handleChangeTaskStatus(newValue, item)}
-                slotProps={{ formControlLabel: { sx: { m: 0 } } as any }}
-              />
-            </Flex>
-          )
-        },
-      },
 
       {
-        // sortKey: "email",
-        // filterKey: "column1",
         filterable: false,
         sortable: false,
         field: '_actions',
+        key: '_actions',
         headerName: '',
-        minWidth: 48,
+        minWidth: 32,
         flex: 1,
         disableReorder: true,
         hideSortIcons: true,
         hideable: false,
         disableColumnMenu: true,
-        style: { width: '2rem' },
+        // style: { width: '2rem' },
         header: '',
         renderCell: (cellProps) => {
           const item = cellProps?.row
           return (
-            <Box height="100%" display="flex" alignItems="center">
+            <Box
+              height="100%"
+              display="flex"
+              alignItems="center"
+              key="_actions"
+            >
               <MoreActionsColumn
-                // index={rIdx}
                 item={item}
                 onOpenTaskModal={openTaskModal}
                 deleteTask={deleteTask}
@@ -447,7 +388,6 @@ const alertProps = {
 }
 
 export type MoreActionsColumnProps = {
-  // index: number
   item: any
   onOpenTaskModal: (task_id: number) => void
   deleteTask: (task_id: number) => void
@@ -483,7 +423,6 @@ const MoreActionsColumn = (props: MoreActionsColumnProps) => {
   }, [])
 
   const handleConfirmedDelete = useCallback(() => {
-    // alert("Send deletion request here for task_id=" + item?.task_id);
     deleteTask(item?.task_id)
     setUi((current) => ({
       ...current,

@@ -2,25 +2,43 @@ import React, { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import {
   BASE_ELEMENT_MODELS,
+  Button,
   EditorStateDbDataType,
   ElementModel,
+  Flex,
   HtmlRenderer,
+  ListNavigation,
   query,
   useEditorRendererController,
 } from '@cmk/fe_utils'
 import axios from 'axios'
 import { UserImage } from './components/UserImage'
 import { QUERY_METHOD } from './api/00_utils/httpQuery'
-import { GroupDetails } from './views/UsersGroupDetails'
-import { TaskModal } from './views/TaskModal'
-import { UpdatesSection } from './views/IndexUpdatesSection'
-import { TasksSection } from './views/IndexTasksSection'
-import { SchedulesSection } from './views/IndexSchedulesSection'
+import { GroupDetails } from './views/users/UsersGroupDetails'
+import { TaskModal } from './views/tasks/TaskModal'
+import { UpdatesSection } from './views/index/IndexUpdatesSection'
+import { TasksSection } from './views/index/IndexTasksSection'
+import { SchedulesSection } from './views/index/IndexSchedulesSection'
 import { useAppController } from './appController/useAppController'
-import { UsersYouSection } from './views/UsersYouSection'
-import { TasksTableSection } from './views/TasksTableSection'
+import { UsersYouSection } from './views/users/UsersYouSection'
+import { TasksTableSection } from './views/tasks/TasksTableSection'
 import { UpdatesTableSection } from './views/UpdatesTableSection'
-import { SchedulesTableSection } from './views/SchedulesTableSection'
+import { SchedulesTableSection } from './views/schedules/SchedulesTableSection'
+import {
+  Box,
+  Divider,
+  Popover,
+  Stack,
+  SwipeableDrawer,
+  Typography,
+} from '@mui/material'
+import { CAvatar } from './components/CAvatar'
+import {
+  mdiAccountGroup,
+  mdiArrowTopRight,
+  mdiCalendar,
+  mdiCheckboxMarkedCirclePlusOutline,
+} from '@mdi/js'
 
 declare const BASE_URL: string
 
@@ -45,7 +63,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     initialEditorState: appData as any,
   })
 
-  const { actions, data, ui, setUi, dataChanges } = useAppController()
+  const cohabAppController = useAppController()
+  const { data, dataChanges, ui, setUi, actions } = cohabAppController
   const {
     getUser,
     getSchedules,
@@ -55,6 +74,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     verifyGoogleOauth,
     logoutUser,
     getDataChanges,
+    toggleDrawerOpen,
   } = actions
 
   const [iconData, setIconData] = React.useState<Record<string, string>>({})
@@ -69,6 +89,9 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
   const handleOpenEditTaskModal = useCallback((task_id: number) => {
     console.log('handleOpenEditTaskModal', task_id)
     setUi((current) => ({ ...current, tasksModal: task_id }))
+  }, [])
+  const handleSwitchTaskInModal = useCallback((newTaskId: number) => {
+    setUi((current) => ({ ...current, tasksModal: newTaskId }))
   }, [])
 
   useEffect(() => {
@@ -104,8 +127,6 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     getDataChanges()
     // getTasks();
   }, [verifyGoogleOauth])
-
-  console.log("'AppHtmlRenderer DATA CHANGES'", dataChanges)
 
   const getIcon = useCallback(
     async (name: string) => {
@@ -164,7 +185,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
         '92508310-e55e-41a9-8f07-d7a4dd3543f1': {
           value: 'tasks',
         },
-        '52b618b9-f949-4541-8052-190a1583bcbe': {
+        '819f6afa-1115-45b7-bf60-ce5c9aae752b': {
           value: 'schedules',
         },
         '511fca47-8ca0-4445-b01b-13776fd49e7c': {
@@ -206,7 +227,16 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
       // appbar
       staticInjections.elementReplacementComponent[
         '4cf5b14d-6151-4b82-9cb4-95ac4185c496'
-      ] = <UserImage src={userImage as any} key={userImage} />
+      ] = (
+        <UserImage
+          src={userImage as any}
+          key={userImage}
+          data={data}
+          userImage={userImage}
+          ui={ui}
+          actions={actions}
+        />
+      )
 
       // index page
       staticInjections.elements['cabf631d-45b4-4432-9d6d-60e935d041d7'] = {
@@ -236,15 +266,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     //   taskTableDef(data, handleOpenEditTaskModal, deleteTask, createOrEditTask)
     staticInjections.elementReplacementComponent[
       'e73e34c5-3342-4b88-8073-a05ed8b968a4'
-    ] = (
-      <SchedulesTableSection
-        data={data}
-        deleteTask={deleteTask}
-        createOrEditTask={createOrEditTask}
-        openTaskModal={handleOpenEditTaskModal}
-        openNewTaskModal={handleOpenNewTaskModal}
-      />
-    )
+    ] = <SchedulesTableSection data={data} appController={cohabAppController} />
     staticInjections.elementReplacementComponent[
       'f7e36ae8-7fcf-45a5-a5da-06e4e8c43978'
     ] = (
@@ -282,6 +304,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     createOrEditTask,
     dataChanges,
     navigate,
+    cohabAppController,
+    actions,
   ])
 
   useEffect(() => {
@@ -290,14 +314,13 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
         const getUserImage = async () => {
           try {
             const imgResponse = await query(QUERY_METHOD.GET_FILE, {
-              url: data?.user?.photo_url,
+              url: data?.user?.photo_url as string,
             })
 
             const imageDataIn = imgResponse?.data
             const reader = new FileReader()
             reader.onload = function (e) {
-              const src = e?.target?.result // URL.createObjectURL(e?.target?.result as any);
-              console.log('imgResponse', imgResponse, src)
+              const src = e?.target?.result
               setUserImage(src as any)
             }
             reader.readAsDataURL(imageDataIn as any)
@@ -343,9 +366,12 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
           data={data}
           open={!!ui.tasksModal}
           onClose={handleClosTaskModal}
-          onConfirm={createOrEditTask}
+          createOrEditTask={createOrEditTask}
+          deleteTask={deleteTask}
+          onSwitchTask={handleSwitchTaskInModal}
         />
       )}
+
       {/* <Box
         // display="none"
         position="fixed"

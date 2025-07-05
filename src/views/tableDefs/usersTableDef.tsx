@@ -16,9 +16,11 @@ import Icon from '@mdi/react'
 import { getUserInitials } from '../../utils/getUserInitials'
 import { Fragment } from 'react/jsx-runtime'
 import { useCallback, useRef, useState } from 'react'
+import { AppControllerData } from '../../appController/types/appControllerData'
+import { CAvatar } from '../../components/CAvatar'
 
 export type UsersTableDefParams = {
-  data: any
+  data: AppControllerData
   removeUserFromGroup?: (user_id: number) => Promise<void>
   makeUserNewGroupAdmin?: (user_id: number) => Promise<void>
 }
@@ -39,20 +41,14 @@ export const usersTableDef = (params: UsersTableDefParams) => {
     data: groupMembers, //[{ column1: "ABCD", column2: "EFGH" }],
     columns: [
       {
-        // sortKey: "name",
-        // filterKey: "column1",
         header: 'Name',
         renderCell: (item) => <td>{formatUserName(item)}</td>,
       },
       {
-        // sortKey: "email",
-        // filterKey: "column1",
         header: 'Email',
         renderCell: 'email',
       },
       {
-        // sortKey: "email",
-        // filterKey: "column1",
         style: { width: '4rem' },
         header: '',
         renderCell: (item) => (
@@ -71,28 +67,13 @@ export const usersTableDef = (params: UsersTableDefParams) => {
                   )
                 }
               >
-                {/* <img
-                  src={item.photo_url}
-                  width={32}
-                  style={{ borderRadius: 9999, marginLeft: '1rem' }}
-                /> */}
-                <Avatar
-                  sx={{
-                    width: 32,
-                    height: 32,
-                    background: item?.user_color,
-                  }}
-                >
-                  {item && getUserInitials(item)}
-                </Avatar>
+                <CAvatar size={32} user={item} />
               </Badge>
             </Tooltip>
           </td>
         ),
       },
       {
-        // sortKey: "email",
-        // filterKey: "column1",
         style: { width: '2rem' },
         header: '',
         renderCell: (item, iIdx) => (
@@ -182,8 +163,6 @@ const MoreActionsColumn = (props: MoreActionsColumnProps) => {
   }, [makeUserNewGroupAdmin, item])
 
   const handleRequestMakeNewGroupAdmin = useCallback(() => {
-    // alert("Send deletion request here for task_id=" + item?.task_id);
-    // deleteTask(item?.task_id)
     setUi((current) => ({
       ...current,
       openMenu: false,
@@ -192,8 +171,6 @@ const MoreActionsColumn = (props: MoreActionsColumnProps) => {
   }, [])
 
   const handleRequestRemoveUserFromGroup = useCallback(() => {
-    // alert("Send deletion request here for task_id=" + item?.task_id);
-    // deleteTask(item?.task_id)
     setUi((current) => ({
       ...current,
       openMenu: false,

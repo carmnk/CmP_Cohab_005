@@ -1,15 +1,13 @@
-import { Box, Typography, useTheme } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
-
-import { taskTableDef } from './tableDefs/taskTableDef'
-import { Task } from './TaskModal'
 import { DataGrid } from '@mui/x-data-grid'
-import { Button, Flex } from '@cmk/fe_utils'
-import { mdiPlus } from '@mdi/js'
 import { dataChangesTableDef } from './tableDefs/dataChangesTableDef'
+import { AppControllerData } from '../appController/types/appControllerData'
+import { Flex } from '@cmk/fe_utils'
+import { Task } from '../appController/types/tasks'
 
 export type UpdatesTableSectionProps = {
-  data?: any
+  data: AppControllerData
   openNewTaskModal?: () => void
   openTaskModal: (task_id: number) => void
   deleteTask: (task_id: number) => Promise<void>
@@ -21,14 +19,7 @@ export type UpdatesTableSectionProps = {
 }
 
 export const UpdatesTableSection = (props: UpdatesTableSectionProps) => {
-  const {
-    data,
-    dataChanges,
-    openTaskModal,
-    deleteTask,
-    createOrEditTask,
-    openNewTaskModal,
-  } = props
+  const { data, dataChanges } = props
 
   const [expandedIds, setExpandedIds] = useState<string[]>([])
   const handleToggleExpandedId = useCallback(
@@ -39,10 +30,6 @@ export const UpdatesTableSection = (props: UpdatesTableSectionProps) => {
     },
     [setExpandedIds]
   )
-  const userGroup = data?.user?.groups?.[0]
-  // const isGroupAdmin = userGroup?.group_admin_user_id === data?.user?.user_id
-
-  const theme = useTheme()
 
   const tableDef = useMemo(() => {
     return dataChangesTableDef(
@@ -60,16 +47,7 @@ export const UpdatesTableSection = (props: UpdatesTableSectionProps) => {
           Updates
         </Typography>
       </Flex>
-      <Box
-        // display="none"
-        // position="fixed"
-        // zIndex={10000000000}
-        // top={0}
-        // left={0}
-        overflow="auto"
-        width="100%"
-        height="100%"
-      >
+      <Box overflow="auto" width="100%" height="100%">
         <Box
           width="100%"
           minWidth={530}
@@ -84,6 +62,19 @@ export const UpdatesTableSection = (props: UpdatesTableSectionProps) => {
             getRowId={(row) => row?.id}
             columns={tableDef?.columns as any}
             disableColumnSelector={true}
+            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+            disableVirtualization
+            getRowHeight={(gridRowParams) => {
+              const userChangeItem = gridRowParams?.model
+              const userChangeItemId = userChangeItem?.user_change_id
+              const matchingDataChanges = dataChanges?.data_changes?.filter(
+                (dc) => {
+                  return dc.user_change_id === userChangeItemId
+                }
+              )
+              console.log
+              return Math.max(52, 20 * matchingDataChanges?.length + 2 * 4)
+            }}
           />
         </Box>
       </Box>
