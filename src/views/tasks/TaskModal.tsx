@@ -636,7 +636,7 @@ export const TaskModal = (props: TaskModalProps) => {
       onClose={onClose}
       disableCloseOnConfirmation
       confirmationLabel="Save"
-      minHeight={task_id ? '97vh' : undefined}
+      minHeight={task_id ? '97dvh' : undefined}
     >
       <Stack height="100%">
         <Box
