@@ -1,6 +1,8 @@
 import { AlertDialog, Button, Flex } from '@cmk/fe_utils'
 import {
+  mdiAccount,
   mdiAccountGroup,
+  mdiAccountPlus,
   mdiCheck,
   mdiDelete,
   mdiDotsVertical,
@@ -31,9 +33,12 @@ export const schedulesTableDef = (
   data: AppControllerData,
   openScheduleModal: (schedule_id: number | true | null) => void,
   deleteSchedule: (schedule_id: number) => void,
-  openSchedulesEntrysModal: (schedule_id: number) => void
+  openSchedulesEntrysModal: (schedule_id: number) => void,
+  isMinMdViewport: boolean
 ) => {
-  const groupMembers = data?.user?.groups?.[0]?.group_members ?? []
+  const userGroup = data?.user?.groups?.[0]
+  const userGroupName = userGroup?.group_name
+  const groupMembers = userGroup?.group_members ?? []
 
   const groupFilterOperators: GridFilterOperator[] = [
     {
@@ -71,7 +76,9 @@ export const schedulesTableDef = (
         headerName: 'Name',
         renderCell: (cellProps) => {
           const item = cellProps?.row
-
+          const createUser = groupMembers?.find(
+            (member) => member.user_id === item?.user_id
+          )
           return (
             <Box>
               <Typography textOverflow={'ellipsis'} overflow={'hidden'}>
@@ -87,74 +94,134 @@ export const schedulesTableDef = (
                   {item?.schedule_description ?? ''}
                 </Typography>
               )}
-            </Box>
-          )
-        },
-      },
-      {
-        headerName: 'Created',
-        field: 'creator_user_id',
-        sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        minWidth: 72,
-        flex: 1,
-        headerAlign: 'center',
-        renderHeader: () => (
-          <Flex justifyContent="center" alignItems="center">
-            <Tooltip title="Schedule creator" placement="top" arrow>
-              <Icon path={mdiPlus} size={1} />
-            </Tooltip>
-          </Flex>
-        ),
-        renderCell: (cellProps) => {
-          const item = cellProps?.row
+              {!isMinMdViewport && (
+                <Flex alignItems="center" gap={'0.125rem'}>
+                  <Tooltip
+                    title={
+                      item?.group_id
+                        ? 'This schedule is shared with group: ' + userGroupName
+                        : 'This schedule is private - only you can see'
+                    }
+                    arrow
+                    placement="top"
+                  >
+                    <Flex alignItems="center">
+                      <Icon
+                        path={item?.group_id ? mdiAccountGroup : mdiAccount}
+                        size={0.7}
+                      />
+                      <Typography variant="body2">{userGroupName}</Typography>
+                    </Flex>
+                  </Tooltip>
+                  <Typography variant="body2">{` | `}</Typography>
 
-          const creatorUser = groupMembers?.find?.(
-            (memb) => memb.user_id === item?.user_id
-          )
-          return (
-            <Box height="100%">
-              <Flex alignItems="center" justifyContent="center" height="100%">
-                <Tooltip
-                  title={formatUserName(creatorUser)}
-                  placement="top"
-                  arrow
-                >
-                  <CAvatar size={32} user={creatorUser} />
-                </Tooltip>
-              </Flex>
-            </Box>
-          )
-        },
-      },
-      {
-        hideable: false,
-        sortable: false,
-        field: 'group_id',
-        headerName: 'Group',
-        filterOperators: groupFilterOperators,
-        minWidth: 85,
-        flex: 1,
-        header: (
-          <Flex justifyContent="center" alignItems="center">
-            <Tooltip title="Schedule editors" placement="top" arrow>
-              <Icon path={mdiAccountGroup} size={1} />
-            </Tooltip>
-          </Flex>
-        ),
-        renderCell: (cellProps) => {
-          const item = cellProps?.row
+                  <Tooltip
+                    title={'Task created by ' + createUser?.user_name}
+                    arrow
+                    placement="top"
+                  >
+                    <Flex alignItems="center">
+                      <Icon path={mdiAccountPlus} size={0.7} />
 
-          return (
-            <Box height="100%">
-              <Flex alignItems="center" justifyContent="center" height="100%">
-                {item?.group_id && <Icon path={mdiCheck} size={1} />}
-              </Flex>
+                      <Box pl="0.25rem">
+                        <CAvatar
+                          user={createUser}
+                          size={14}
+                          sx={{ fontSize: '0.7rem' }}
+                        />
+                      </Box>
+                    </Flex>
+                  </Tooltip>
+                </Flex>
+              )}
             </Box>
           )
         },
       },
+      ...(isMinMdViewport
+        ? [
+            {
+              headerName: 'Created',
+              field: 'creator_user_id',
+              sortable: false,
+              filterable: false,
+              disableColumnMenu: true,
+              minWidth: 72,
+              flex: 1,
+              headerAlign: 'center',
+              renderHeader: () => (
+                <Flex justifyContent="center" alignItems="center">
+                  <Tooltip title="Schedule creator" placement="top" arrow>
+                    <Icon path={mdiPlus} size={1} />
+                  </Tooltip>
+                </Flex>
+              ),
+              renderCell: (cellProps) => {
+                const item = cellProps?.row
+
+                const creatorUser = groupMembers?.find?.(
+                  (memb) => memb.user_id === item?.user_id
+                )
+                return (
+                  <Box height="100%">
+                    <Flex
+                      alignItems="center"
+                      justifyContent="center"
+                      height="100%"
+                    >
+                      <Tooltip
+                        title={formatUserName(creatorUser)}
+                        placement="top"
+                        arrow
+                      >
+                        <CAvatar size={32} user={creatorUser} />
+                      </Tooltip>
+                    </Flex>
+                  </Box>
+                )
+              },
+            },
+            {
+              hideable: false,
+              sortable: false,
+              field: 'group_id',
+              headerName: 'Group',
+              filterOperators: groupFilterOperators,
+              minWidth: 85,
+              flex: 1,
+              header: (
+                <Flex justifyContent="center" alignItems="center">
+                  <Tooltip title="Schedule editors" placement="top" arrow>
+                    <Icon path={mdiAccountGroup} size={1} />
+                  </Tooltip>
+                </Flex>
+              ),
+              renderCell: (cellProps) => {
+                const item = cellProps?.row
+
+                return (
+                  <Box height="100%">
+                    <Flex
+                      alignItems="center"
+                      justifyContent="center"
+                      height="100%"
+                    >
+                      {item?.group_id && (
+                        <Tooltip
+                          title={userGroup?.group_name}
+                          arrow
+                          placement="top"
+                        >
+                          <Icon path={mdiAccountGroup} size={1} />
+                        </Tooltip>
+                      )}
+                    </Flex>
+                  </Box>
+                )
+              },
+            },
+          ]
+        : []),
 
       {
         filterable: false,
@@ -162,7 +229,7 @@ export const schedulesTableDef = (
         field: '_actions',
         headerName: '',
         minWidth: 96,
-        flex: 1,
+        flex: 0,
         disableReorder: true,
         hideSortIcons: true,
         hideable: false,

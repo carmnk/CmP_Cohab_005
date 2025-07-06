@@ -23,8 +23,9 @@ export const AddTaskTreeItem = (props: AddTaskTreeItemProps) => {
     []
   )
 
-  const handleSubmitNewTask = useCallback(() => {
-    onSubmitNewTask?.(formData?.task_name, parent_task_id)
+  const handleSubmitNewTask = useCallback(async () => {
+    await onSubmitNewTask?.(formData?.task_name, parent_task_id)
+    setFormData({ task_name: '' })
   }, [onSubmitNewTask, formData?.task_name, parent_task_id])
 
   const handleKeyDown = useCallback(

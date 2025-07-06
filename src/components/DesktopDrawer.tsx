@@ -149,7 +149,9 @@ export const DesktopDrawer = (props: DesktopDrawerProps) => {
           />
         </Box>
         <Flex width="100%" justifyContent="center" mt="2rem">
-          <Button variant="outlined">Logout</Button>
+          <Button variant="outlined" onClick={actions.logoutUser}>
+            Logout
+          </Button>
         </Flex>
       </Stack>
     </SwipeableDrawer>

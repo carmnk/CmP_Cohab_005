@@ -1,6 +1,8 @@
 import { AlertDialog, Button, Checkbox, Flex } from '@cmk/fe_utils'
 import {
+  mdiAccount,
   mdiAccountGroup,
+  mdiAccountPlus,
   mdiCalendarAlertOutline,
   mdiCheck,
   mdiDelete,
@@ -11,7 +13,6 @@ import {
 import {
   Typography,
   Tooltip,
-  Avatar,
   Menu,
   MenuItem,
   ListItemIcon,
@@ -23,7 +24,6 @@ import {
 import { formatUserName } from '../../utils/formatUsername'
 import { useCallback, useRef, useState } from 'react'
 import Icon from '@mdi/react'
-import { getUserInitials } from '../../utils/getUserInitials'
 import moment from 'moment'
 import { GridFilterOperator } from '@mui/x-data-grid'
 import { AppControllerData } from '../../appController/types/appControllerData'
@@ -34,9 +34,11 @@ export const taskTableDef = (
   data: AppControllerData,
   openTaskModal: (task_id: number) => void,
   deleteTask: (task_id: number) => void,
-  createOrEditTask: (task: Task) => Promise<void>
+  createOrEditTask: (task: Task) => Promise<void>,
+  isMinSmViewport: boolean
 ) => {
-  const groupMembers = data?.user?.groups?.[0]?.group_members ?? []
+  const userGroup = data?.user?.groups?.[0]
+  const groupMembers = userGroup?.group_members ?? []
   const handleChangeTaskStatus = async (newValue: boolean, item: Task) => {
     console.log('handleChangeTaskStatus', newValue)
     const newFormData = {
@@ -177,61 +179,119 @@ export const taskTableDef = (
         headerName: 'Name',
         renderCell: (cellProps) => {
           const item = cellProps?.row
-
+          const userGroup = item?.owner_group_id
+            ? data?.user?.groups?.find(
+                (gr) => gr.group_id === item?.owner_group_id
+              )?.group_name
+            : 'Private'
+          const createUser = groupMembers?.find(
+            (member) => member.user_id === item?.owner_user_id
+          )
           return (
             <Box key={'task_name'}>
               <Typography>{item?.task_name ?? '-'}</Typography>
-              {item?.due_datetime && (
+
+              <Flex alignItems="center" gap={'0.125rem'}>
+                <Icon path={mdiCalendarAlertOutline} size={0.7} />
+                <Typography variant="body2">
+                  {item?.due_datetime
+                    ? moment(item?.due_datetime).format('DD.MM.YYYY HH:mm')
+                    : '-'}
+                </Typography>
+              </Flex>
+              {!isMinSmViewport && (
                 <Flex alignItems="center" gap={'0.125rem'}>
-                  <Icon path={mdiCalendarAlertOutline} size={0.7} />
-                  <Typography variant="body2">
-                    {moment(item?.due_datetime).format('DD.MM.YYYY HH:mm')}
-                  </Typography>
+                  <Tooltip
+                    title={
+                      item?.owner_group_id
+                        ? 'This task is shared with group: ' + userGroup
+                        : 'This task is private - only you can see'
+                    }
+                    arrow
+                    placement="top"
+                  >
+                    <Flex alignItems="center">
+                      <Icon
+                        path={
+                          item?.owner_group_id ? mdiAccountGroup : mdiAccount
+                        }
+                        size={0.7}
+                      />
+                      <Typography variant="body2">{userGroup}</Typography>
+                    </Flex>
+                  </Tooltip>
+                  <Typography variant="body2">{` | `}</Typography>
+
+                  <Tooltip
+                    title={'Task created by ' + createUser?.user_name}
+                    arrow
+                    placement="top"
+                  >
+                    <Flex alignItems="center">
+                      <Icon path={mdiAccountPlus} size={0.7} />
+
+                      <Box pl="0.25rem">
+                        <CAvatar
+                          user={createUser}
+                          size={14}
+                          sx={{ fontSize: '0.7rem' }}
+                        />
+                      </Box>
+                    </Flex>
+                  </Tooltip>
                 </Flex>
               )}
             </Box>
           )
         },
       },
-      {
-        headerName: 'Created',
-        field: 'creator_user_id',
-        key: 'creator_user_id',
-        sortable: false,
-        filterable: false,
-        disableColumnMenu: true,
-        maxWidth: 80,
-        width: 80,
-        flex: 1,
-        headerAlign: 'center',
-        renderHeader: () => (
-          <Flex justifyContent="center" alignItems="center">
-            <Tooltip title="Task creator" placement="top" arrow>
-              <Icon path={mdiPlus} size={1} />
-            </Tooltip>
-          </Flex>
-        ),
-        renderCell: (cellProps) => {
-          const item = cellProps?.row
+      ...(!isMinSmViewport
+        ? []
+        : [
+            {
+              headerName: 'Created',
+              field: 'creator_user_id',
+              key: 'creator_user_id',
+              sortable: false,
+              filterable: false,
+              disableColumnMenu: true,
+              maxWidth: 80,
+              width: 80,
+              flex: 1,
+              headerAlign: 'center',
+              renderHeader: () => (
+                <Flex justifyContent="center" alignItems="center">
+                  <Tooltip title="Task creator" placement="top" arrow>
+                    <Icon path={mdiPlus} size={1} />
+                  </Tooltip>
+                </Flex>
+              ),
+              renderCell: (cellProps) => {
+                const item = cellProps?.row
 
-          const creatorUser = groupMembers?.find?.(
-            (memb) => memb.user_id === item?.owner_user_id
-          )
-          return (
-            <Box height="100%" key={'creator_user_id'}>
-              <Flex alignItems="center" justifyContent="center" height="100%">
-                <Tooltip
-                  title={formatUserName(creatorUser)}
-                  placement="top"
-                  arrow
-                >
-                  <CAvatar size={32} user={creatorUser} />
-                </Tooltip>
-              </Flex>
-            </Box>
-          )
-        },
-      },
+                const creatorUser = groupMembers?.find?.(
+                  (memb) => memb.user_id === item?.owner_user_id
+                )
+                return (
+                  <Box height="100%" key={'creator_user_id'}>
+                    <Flex
+                      alignItems="center"
+                      justifyContent="center"
+                      height="100%"
+                    >
+                      <Tooltip
+                        title={formatUserName(creatorUser)}
+                        placement="top"
+                        arrow
+                      >
+                        <CAvatar size={32} user={creatorUser} />
+                      </Tooltip>
+                    </Flex>
+                  </Box>
+                )
+              },
+            },
+          ]),
       {
         disableReorder: true,
         hideSortIcons: true,
@@ -239,10 +299,10 @@ export const taskTableDef = (
         sortable: false,
         filterable: false,
         disableColumnMenu: true,
-        field: 'editors_user_ids',
-        key: 'editors_user_ids',
-        style: { width: '3rem' },
-        minWidth: 80,
+        field: 'editors_user_id',
+        key: 'editors_user_id',
+        // style: { width: '3rem' },
+        minWidth: 60,
         flex: 1,
         headerName: 'Editors',
         headerAlign: 'center',
@@ -256,73 +316,71 @@ export const taskTableDef = (
         renderCell: (cellProps) => {
           const item = cellProps?.row
 
-          const editorUserIds = item.task_editors_user_ids || []
-          const editorUsers = editorUserIds.map((eUserId) =>
-            groupMembers?.find((memb) => memb.user_id === eUserId)
+          const editorUserId = item.task_editor_user_id || []
+          const editorUser = groupMembers?.find(
+            (memb) => memb.user_id === editorUserId
           )
-          return (
-            <Box key={'editors_user_ids'}>
-              <Tooltip
-                title={editorUsers
-                  .map((user) => formatUserName(user))
-                  .join(', ')}
-                placement="top"
-                arrow
-              >
-                <Badge
-                  badgeContent={editorUsers.length > 1 ? editorUsers.length : 0}
-                  color="default"
-                  slotProps={{ badge: { sx: { bgcolor: '#ddd' } } as any }}
-                >
-                  <Flex alignItems="center" justifyContent="center">
-                    {editorUsers.slice(0, 2).map((eUser, eIdx) => (
-                      <CAvatar
-                        user={eUser}
-                        size={32}
-                        key={eIdx}
-                        sx={{
-                          // width: 32,
-                          // height: 32,
-                          ml: eIdx ? -2 : undefined,
-                          // bgcolor: eUser?.user_color,
-                        }}
-                      />
-                    ))}
-                  </Flex>
-                </Badge>
-              </Tooltip>
-            </Box>
-          )
-        },
-      },
-      {
-        hideable: false,
-        sortable: false,
-        field: 'group_id',
-        key: 'group_id',
-        headerName: 'Group',
-        filterOperators: groupFilterOperators,
-        minWidth: 32,
-        flex: 1,
-        header: (
-          <Flex justifyContent="center" alignItems="center">
-            <Tooltip title="Task editors" placement="top" arrow>
-              <Icon path={mdiAccountGroup} size={1} />
-            </Tooltip>
-          </Flex>
-        ),
-        renderCell: (cellProps) => {
-          const item = cellProps?.row
 
           return (
-            <Box height="100%" key={'group_id'}>
-              <Flex alignItems="center" justifyContent="center" height="100%">
-                {item?.owner_group_id && <Icon path={mdiCheck} size={1} />}
-              </Flex>
-            </Box>
+            <Flex
+              key={'editors_user_id'}
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+            >
+              <Tooltip title={formatUserName(editorUser)} placement="top" arrow>
+                <Flex alignItems="center" justifyContent="center">
+                  <CAvatar user={editorUser} size={32} />
+                </Flex>
+              </Tooltip>
+            </Flex>
           )
         },
       },
+      ...(!isMinSmViewport
+        ? []
+        : [
+            {
+              hideable: false,
+              sortable: false,
+              field: 'group_id',
+              key: 'group_id',
+              headerName: 'Group',
+              filterOperators: groupFilterOperators,
+              minWidth: 32,
+              flex: 1,
+              header: (
+                <Flex justifyContent="center" alignItems="center">
+                  <Tooltip title="Task editors" placement="top" arrow>
+                    <Icon path={mdiAccountGroup} size={1} />
+                  </Tooltip>
+                </Flex>
+              ),
+              renderCell: (cellProps) => {
+                const item = cellProps?.row
+
+                return (
+                  <Box height="100%" key={'group_id'}>
+                    <Flex
+                      alignItems="center"
+                      justifyContent="center"
+                      height="100%"
+                    >
+                      {item?.owner_group_id && userGroup && (
+                        <Tooltip
+                          title={userGroup?.group_name}
+                          arrow
+                          placement="top"
+                        >
+                          <Icon path={mdiAccountGroup} size={1} />
+                        </Tooltip>
+                      )}
+                    </Flex>
+                  </Box>
+                )
+              },
+            },
+          ]),
 
       {
         filterable: false,
@@ -330,7 +388,7 @@ export const taskTableDef = (
         field: '_actions',
         key: '_actions',
         headerName: '',
-        minWidth: 32,
+        minWidth: 48,
         flex: 1,
         disableReorder: true,
         hideSortIcons: true,
@@ -346,6 +404,7 @@ export const taskTableDef = (
               display="flex"
               alignItems="center"
               key="_actions"
+              justifyContent="center"
             >
               <MoreActionsColumn
                 item={item}
@@ -432,7 +491,7 @@ const MoreActionsColumn = (props: MoreActionsColumnProps) => {
   }, [item, deleteTask])
   return (
     <>
-      <Box>
+      <Box width="max-content">
         <Button
           variant="outlined"
           iconButton

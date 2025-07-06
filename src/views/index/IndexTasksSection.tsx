@@ -25,23 +25,24 @@ export const TasksSection = (props: TasksSectionProps) => {
 
       <Box
         display="grid"
-        gridTemplateColumns="1fr 1fr 2rem"
+        gridTemplateColumns="1fr 3rem"
         gap={'0.25rem 1rem'}
+        maxWidth={500}
       >
         <Typography></Typography>
-        <Typography fontWeight={500}>Open</Typography>
-        <Typography></Typography>
+        <Typography fontWeight={500} textAlign="center">
+          Open
+        </Typography>
+        {/* <Typography></Typography> */}
 
         <Typography>My Personal Tasks ({privateTasks.length})</Typography>
         <Box>
-          <Typography>
-            open: (
+          <Typography textAlign="center">
             {privateTasks.filter((task) => task.task_status === 'open')?.length}
-            )
           </Typography>
           {/* <Typography>overdue: (?...)</Typography> */}
         </Box>
-        <Box>
+        {/* <Box>
           <Button
             variant="outlined"
             iconButton
@@ -49,17 +50,16 @@ export const TasksSection = (props: TasksSectionProps) => {
             disabled
             tooltip="*Coming Soon*"
           ></Button>
-        </Box>
+        </Box> */}
 
         <Typography>Group Tasks ({groupTasks.length})</Typography>
         <Box>
-          <Typography>
-            open: (
-            {groupTasks.filter((task) => task.task_status === 'open')?.length})
+          <Typography textAlign="center">
+            {groupTasks.filter((task) => task.task_status === 'open')?.length}
           </Typography>
           {/* <Typography>overdue: (?...)</Typography> */}
         </Box>
-        <Box>
+        {/* <Box>
           <Button
             variant="outlined"
             iconButton
@@ -67,7 +67,7 @@ export const TasksSection = (props: TasksSectionProps) => {
             disabled
             tooltip="*Coming Soon*"
           ></Button>
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   )

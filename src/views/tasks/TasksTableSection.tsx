@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useEffect, useMemo, useRef } from 'react'
 import { taskTableDef } from '../tableDefs/taskTableDef'
 import { DataGrid } from '@mui/x-data-grid'
@@ -24,9 +24,19 @@ export const TasksTableSection = (props: TasksTableSectionProps) => {
     openNewTaskModal,
   } = props
 
+  const theme = useTheme()
+  const isMinSmViewport = useMediaQuery(theme.breakpoints.up('sm'))
+  const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
+
   const tableDef = useMemo(() => {
-    return taskTableDef(data, openTaskModal, deleteTask, createOrEditTask)
-  }, [data, createOrEditTask, deleteTask, openTaskModal])
+    return taskTableDef(
+      data,
+      openTaskModal,
+      deleteTask,
+      createOrEditTask,
+      isMinMdViewport
+    )
+  }, [data, createOrEditTask, deleteTask, openTaskModal, isMinMdViewport])
 
   const apiRef = useRef(null)
 
@@ -66,10 +76,11 @@ export const TasksTableSection = (props: TasksTableSectionProps) => {
       >
         <Box
           width="100%"
-          minWidth={530}
+          minWidth={isMinMdViewport ? 530 : 0}
           height="100%"
           overflow="hidden"
           mt="1rem"
+          pr="0.5rem"
         >
           <DataGrid
             apiRef={apiRef}
@@ -79,6 +90,11 @@ export const TasksTableSection = (props: TasksTableSectionProps) => {
             getRowId={(row) => row.task_id}
             columns={tableDef?.columns as any}
             disableColumnSelector={true}
+            getRowHeight={(gridRowParams) => {
+              return isMinMdViewport ? 51 : 68
+            }}
+            pageSizeOptions={[10, 50, 100]}
+            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
             // pageSizeOptions={[
             //   { value: 11, label: '11' },
             //   { value: 10, label: '10' },

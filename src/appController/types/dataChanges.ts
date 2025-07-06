@@ -6,6 +6,7 @@ export type DataChange = {
   old_value: string | null
   path: null
   user_change_id: number
+  change_datetime: string
 }
 
 export type UserChange = {

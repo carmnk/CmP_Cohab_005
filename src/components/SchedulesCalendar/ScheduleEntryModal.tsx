@@ -71,10 +71,10 @@ export const ScheduleEntryModal = (props: ScheduleEntryModalProps) => {
             entry_end: moment(existingScheduleEntry?.entry_end),
           } as any)
         : defaultScheduleEntryData(
-            user?.user_id ?? null,
-            user?.group_id ?? null
+            schedule?.user_id ?? null,
+            schedule?.group_id ?? null
           ),
-    [schedule_entry_id, existingScheduleEntry, user]
+    [schedule_entry_id, existingScheduleEntry, schedule]
   )
 
   const [formData, setFormData] = useState<ScheduleEntry>(
@@ -103,10 +103,10 @@ export const ScheduleEntryModal = (props: ScheduleEntryModalProps) => {
     if (userId) {
       formDataAdj.user_id = userId
     }
-    const groupId = data?.user?.group_id
-    if (groupId) {
-      formDataAdj.group_id = groupId
-    }
+    // const groupId = data?.user?.group_id
+    // if (groupId) {
+    //   formDataAdj.group_id = groupId
+    // }
     if (schedule_id) {
       formDataAdj.schedule_id = schedule_id
     }

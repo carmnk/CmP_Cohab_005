@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from '@mui/material'
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { Button, Flex } from '@cmk/fe_utils'
@@ -16,8 +16,11 @@ export type SchedulesTableSectionProps = {
 
 export const SchedulesTableSection = (props: SchedulesTableSectionProps) => {
   const { data, appController } = props
-
   const actions = appController?.actions as AppControllerActions
+
+  const theme = useTheme()
+  const isMinSmViewport = useMediaQuery(theme.breakpoints.up('sm'))
+  const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
 
   const [ui, setUi] = useState({
     scheduleModal: null as number | true | null,
@@ -52,13 +55,15 @@ export const SchedulesTableSection = (props: SchedulesTableSectionProps) => {
       data,
       handleOpenEditScheduleModal,
       actions.deleteSchedule,
-      handleOpenSchedulesEntrysModal
+      handleOpenSchedulesEntrysModal,
+      isMinMdViewport
     )
   }, [
     data,
     actions.deleteSchedule,
     handleOpenEditScheduleModal,
     handleOpenSchedulesEntrysModal,
+    isMinMdViewport,
   ])
 
   const handleConfirm = useCallback(
@@ -95,18 +100,23 @@ export const SchedulesTableSection = (props: SchedulesTableSectionProps) => {
       >
         <Box
           width="100%"
-          minWidth={530}
+          minWidth={isMinMdViewport ? 530 : 0}
           height="100%"
           overflow="hidden"
           mt="1rem"
         >
           <DataGrid
-            autosizeOnMount
+            // autosizeOnMount
             autosizeOptions={{ expand: true }}
             rows={data?.schedules ?? []}
             getRowId={(row) => row.schedule_id}
             columns={tableDef?.columns as any}
             disableColumnSelector={true}
+            pageSizeOptions={[10, 50, 100]}
+            initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+            getRowHeight={(gridRowParams) => {
+              return isMinMdViewport ? 51 : 68
+            }}
           />
         </Box>
       </Box>

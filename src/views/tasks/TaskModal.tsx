@@ -9,7 +9,6 @@ import {
   Modal,
 } from '@cmk/fe_utils'
 import {
-  Avatar,
   Box,
   Chip,
   Stack,
@@ -29,7 +28,6 @@ import { formatUserName } from '../../utils/formatUsername'
 import { CDateTimePicker } from '../../components/DateTimePicker'
 import moment, { Moment } from 'moment'
 import { AppControllerData } from '../../appController/types/appControllerData'
-import { getUserInitials } from '../../utils/getUserInitials'
 import {
   mdiAccount,
   mdiAccountGroup,
@@ -38,7 +36,6 @@ import {
   mdiFileTree,
   mdiFilter,
   mdiFilterOff,
-  mdiOpenInNew,
   mdiPencil,
   mdiPlus,
 } from '@mdi/js'
@@ -68,6 +65,8 @@ const defaultTaskData: Omit<Task, 'task_id'> = {
   created_at: null as any,
 }
 
+const mobileDialogSlotProps = { paper: { sx: { mx: '1rem' } } }
+
 export type TaskModalProps = {
   data: AppControllerData
   open: boolean
@@ -78,13 +77,13 @@ export type TaskModalProps = {
   task_id?: number
 }
 
-const getRecursiveParentTaskIds = (task_id: number, tasks: Task[]) => {
+export const getRecursiveParentTaskIds = (task_id: number, tasks: Task[]) => {
   const task = tasks?.find((t) => t.task_id === task_id)
   const parentId = task?.parent_task_id
   const recursiveTasks = parentId
     ? getRecursiveParentTaskIds(parentId, tasks)
     : []
-  return [parentId, ...recursiveTasks]
+  return [parentId, ...recursiveTasks].filter((val) => val && val !== 0)
 }
 
 const formatFormData = (formDataIn: any) => ({
@@ -615,15 +614,21 @@ export const TaskModal = (props: TaskModalProps) => {
 
             {isMinSmViewport && metaFields}
           </Flex>
-          <Flex mb={'0.25rem'} alignItems="center" gap="1rem">
+          <Flex
+            mb={'0.25rem'}
+            alignItems="center"
+            gap="1rem"
+            justifyContent="space-between"
+          >
             <Typography>Subtasks ({recursiveSubTasks?.length ?? 0})</Typography>
             <Button
               borderRadius={9999}
               label={
                 // ui?.showOnlyOpenSubtasks ?
-                'Only Open Tasks'
+                'Only Open'
               }
               icon={ui?.showOnlyOpenSubtasks ? mdiFilterOff : mdiFilter}
+              fontColor="#333"
               size="small"
               color={ui?.showOnlyOpenSubtasks ? 'primary' : 'inherit'}
               onClick={handleToggleShowOnlyOpenSubtasks}
@@ -639,6 +644,7 @@ export const TaskModal = (props: TaskModalProps) => {
       disableCloseOnConfirmation
       confirmationLabel="Save"
       minHeight={task_id ? '97dvh' : undefined}
+      slotProps={isMinSmViewport ? undefined : mobileDialogSlotProps}
     >
       <Stack height="100%">
         <Box

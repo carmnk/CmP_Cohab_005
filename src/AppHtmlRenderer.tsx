@@ -256,9 +256,22 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
           updateUser={getUser}
         />
       )
+      staticInjections.elementReplacementComponent[
+        '978e3785-69e1-42c8-8135-cd7951109a41'
+      ] = (
+        <UsersYouSection
+          data={data}
+          key={'users_you_section'}
+          userImageSrc={userImage}
+          updateUser={getUser}
+        />
+      )
 
       staticInjections.elementReplacementComponent[
         'deeca0a8-4c90-4512-b58d-c70ea468df1d'
+      ] = <GroupDetails data={data} updateUser={getUser} />
+      staticInjections.elementReplacementComponent[
+        '40d8e5bd-3aeb-40c2-a0dc-68b9d55da652'
       ] = <GroupDetails data={data} updateUser={getUser} />
     }
 

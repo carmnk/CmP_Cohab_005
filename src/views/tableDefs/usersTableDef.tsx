@@ -11,6 +11,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Typography,
 } from '@mui/material'
 import Icon from '@mdi/react'
 import { getUserInitials } from '../../utils/getUserInitials'
@@ -46,10 +47,16 @@ export const usersTableDef = (params: UsersTableDefParams) => {
       },
       {
         header: 'Email',
-        renderCell: 'email',
+        renderCell: (item) => (
+          <td>
+            <Typography textOverflow="ellipsis" overflow="hidden">
+              {item?.email}
+            </Typography>
+          </td>
+        ),
       },
       {
-        style: { width: '4rem' },
+        style: { width: '3rem' },
         header: '',
         renderCell: (item) => (
           <td>
