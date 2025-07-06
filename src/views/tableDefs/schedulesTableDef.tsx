@@ -42,7 +42,7 @@ export const schedulesTableDef = (
 
   const groupFilterOperators: GridFilterOperator[] = [
     {
-      label: 'Your Private Tasks',
+      label: 'Your Private Schedules',
       value: 'null',
       getApplyFilterFn: (filterItem, column) => {
         if (!filterItem.field || !filterItem.operator) {
@@ -116,7 +116,7 @@ export const schedulesTableDef = (
                   <Typography variant="body2">{` | `}</Typography>
 
                   <Tooltip
-                    title={'Task created by ' + createUser?.user_name}
+                    title={'Schedule created by ' + createUser?.user_name}
                     arrow
                     placement="top"
                   >

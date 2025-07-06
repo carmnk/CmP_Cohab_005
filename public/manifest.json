@@ -1,0 +1,23 @@
+{
+  "short_name": "Cohab",
+  "name": "Cohab - An app to plan shared tasks",
+  "description": "An app to plan shared tasks and schedules",
+  "icons": [
+    {
+      "src": "/apps/cohab/logo_192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/app/logo_512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "id": "/app/?entry=pwa",
+  "start_url": "/app/?entry=pwa",
+  "background_color": "rgba(245, 245, 247, 1)",
+  "display": "standalone",
+  "scope": "/app/",
+  "theme_color": "rgba(0, 228, 156, 1)"
+}
