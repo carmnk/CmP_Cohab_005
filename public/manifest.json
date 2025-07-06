@@ -15,9 +15,9 @@
     }
   ],
   "id": "/app/?entry=pwa",
-  "start_url": "/app/?entry=pwa",
+  "start_url": "/apps/cohab/?entry=pwa",
   "background_color": "rgba(245, 245, 247, 1)",
   "display": "standalone",
-  "scope": "/app/",
+  "scope": "/apps/cohab",
   "theme_color": "rgba(0, 228, 156, 1)"
 }
