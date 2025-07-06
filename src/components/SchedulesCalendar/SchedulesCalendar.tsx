@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, useMediaQuery, useTheme } from '@mui/material'
 import moment from 'moment'
 import { Fragment } from 'react/jsx-runtime'
 import { ScheduleEntryField } from './ScheduleEntry'
@@ -48,6 +48,9 @@ export const SchedulesCalendar = (props: SchedulesCalendarProps) => {
     onCreateOrEditScheduleEntry,
     deleteScheduleEntry,
   } = props
+
+  const theme = useTheme()
+  const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
 
   const currentWeek = moment().isoWeek()
 
@@ -199,13 +202,13 @@ export const SchedulesCalendar = (props: SchedulesCalendarProps) => {
         <Box
           display="grid"
           gridTemplateColumns="1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"
-          gridTemplateRows="repeat(1, 60px)"
+          sx={{ '& >div': { minHeight: 60 } }}
           mt={1}
         >
           <Box sx={basicHeaderSx}></Box>
           <Box sx={columnHeaderSx}>
             <Box>
-              <Typography>Monday</Typography>
+              <Typography>{isMinMdViewport ? 'Monday' : 'Mon'}</Typography>
               <Typography variant="body2">
                 {weekStartDate.format('DD.MM')}
               </Typography>
@@ -213,13 +216,13 @@ export const SchedulesCalendar = (props: SchedulesCalendarProps) => {
           </Box>
           <Box sx={columnHeaderSx}>
             <Box>
-              <Typography>Tuesday</Typography>
+              <Typography>{isMinMdViewport ? 'Tuesday' : 'Tue'}</Typography>
               <Typography variant="body2">{tuesday.format('DD.MM')}</Typography>
             </Box>
           </Box>
           <Box sx={columnHeaderSx}>
             <Box>
-              <Typography>Wednesday</Typography>
+              <Typography>{isMinMdViewport ? 'Wednesday' : 'Wed'}</Typography>
               <Typography variant="body2">
                 {wednesday.format('DD.MM')}
               </Typography>
@@ -227,7 +230,7 @@ export const SchedulesCalendar = (props: SchedulesCalendarProps) => {
           </Box>
           <Box sx={columnHeaderSx}>
             <Box>
-              <Typography>Thursday</Typography>
+              <Typography>{isMinMdViewport ? 'Thursday' : 'Thu'}</Typography>
               <Typography variant="body2">
                 {thursday.format('DD.MM')}
               </Typography>
@@ -235,13 +238,13 @@ export const SchedulesCalendar = (props: SchedulesCalendarProps) => {
           </Box>
           <Box sx={columnHeaderSx}>
             <Box>
-              <Typography>Friday</Typography>
+              <Typography>{isMinMdViewport ? 'Friday' : 'Fri'}</Typography>
               <Typography variant="body2">{friday.format('DD.MM')}</Typography>
             </Box>
           </Box>
           <Box sx={columnHeaderSx}>
             <Box>
-              <Typography>Saturday</Typography>
+              <Typography>{isMinMdViewport ? 'Saturday' : 'Sat'}</Typography>
               <Typography variant="body2">
                 {saturday.format('DD.MM')}
               </Typography>
@@ -249,16 +252,11 @@ export const SchedulesCalendar = (props: SchedulesCalendarProps) => {
           </Box>
           <Box sx={columnHeaderSx}>
             <Box>
-              <Typography>Sunday</Typography>
+              <Typography>{isMinMdViewport ? 'Sunday' : 'Sun'}</Typography>
               <Typography variant="body2">{sunday.format('DD.MM')}</Typography>
             </Box>
           </Box>
-        </Box>
-        <Box
-          display="grid"
-          gridTemplateColumns="1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr"
-          gridTemplateRows="repeat(24, 60px)"
-        >
+
           {new Array(24).fill(null).map((_, index) => {
             const hour = Math.floor(index)
             const row = index
@@ -370,6 +368,7 @@ export const SchedulesCalendar = (props: SchedulesCalendarProps) => {
           })}
         </Box>
       </Box>
+
       {ui.entryModal && (
         <ScheduleEntryModal
           schedule_id={schedule_id}

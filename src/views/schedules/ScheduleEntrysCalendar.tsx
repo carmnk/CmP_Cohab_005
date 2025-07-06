@@ -1,6 +1,6 @@
 import { Flex } from '@cmk/fe_utils'
-import { Box, Dialog, Typography } from '@mui/material'
-import { useCallback, useMemo } from 'react'
+import { Box, Dialog, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { useMemo } from 'react'
 import { SchedulesCalendar } from '../../components/SchedulesCalendar/SchedulesCalendar'
 import Icon from '@mdi/react'
 import { mdiCalendar } from '@mdi/js'
@@ -37,20 +37,28 @@ export const ScheduleEntrysCalendar = (props: ScheduleModalProps) => {
     deleteScheduleEntry,
     createOrEditScheduleEntry,
   } = props
-  // const groups = data?.user?.groups
-  // const groupMembers = groups?.[0]?.group_members
+  const theme = useTheme()
+  const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
 
-  const existingSchedule =
-    schedule_id &&
-    data?.schedules?.find((sched) => sched.schedule_id === schedule_id)
+  const existingSchedule = useMemo(
+    () =>
+      schedule_id &&
+      data?.schedules?.find((sched) => sched.schedule_id === schedule_id),
+    [schedule_id, data?.schedules]
+  )
 
   const scheduleEntrys = useMemo(() => {
     return (existingSchedule && existingSchedule?.schedule_entrys) || []
   }, [existingSchedule])
 
   return (
-    <Dialog maxWidth="xl" open={open} onClose={onClose}>
-      <Box p="2rem">
+    <Dialog
+      maxWidth="xl"
+      open={open}
+      onClose={onClose}
+      slotProps={{ paper: { sx: { mx: '1rem' } } }}
+    >
+      <Box p={isMinMdViewport ? '2rem' : '1rem'}>
         <Flex alignItems="center" gap={'0.25rem'}>
           <Icon path={mdiCalendar} size={0.85} />
           <Typography variant="h6">
