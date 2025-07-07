@@ -12,6 +12,7 @@ import { API } from '../../api/API'
 import { formatUserName } from '../../utils/formatUsername'
 import { usersTableDef } from '../tableDefs/usersTableDef'
 import { AppControllerData } from '../../appController/types/appControllerData'
+import toast from 'react-hot-toast'
 
 export type GroupDetailsProps = {
   data: AppControllerData
@@ -70,24 +71,24 @@ export const GroupDetails = (props: GroupDetailsProps) => {
 
   const inviteUser = useCallback(async () => {
     if (!formData.email) {
-      alert('Please enter an email address')
+      toast.error('Please enter an email address')
       return
     }
     const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!regexEmail.test(formData.email)) {
-      alert('Please enter a valid email address')
+      toast.error('Please enter a valid email address')
       return
     }
     try {
       const resInvite = await API.sendGroupInvitation.query({
         invitee_email: formData.email,
       })
-      console.log('resInvite', resInvite)
+      console.debug('resInvite', resInvite)
       if (resInvite?.data?.success) {
-        alert('Invitation sent successfully!')
+        toast.success('Invitation successfully sent')
         updateUser?.()
       } else {
-        alert('Failed to send invitation. Please try again.')
+        toast.error('Failed to send invitation. Please try again.')
       }
     } catch (error) {
       console.error('Error sending invitation:', error)
@@ -95,7 +96,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
         error?.status === 409
           ? 'An invitation has already been sent to this email address.'
           : 'An error occurred while sending the invitation. Please try again.'
-      alert(errorMessage)
+      toast.error(errorMessage)
     }
   }, [formData.email, updateUser])
 
@@ -104,12 +105,12 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       const resAccpeptInvite = await API.acceptGroupInvitation.query({
         group_invitation_id,
       })
-      console.log('resInvite', resAccpeptInvite)
+      console.debug('resInvite', resAccpeptInvite)
       if (resAccpeptInvite?.data?.success) {
-        alert('Invitation accepted!')
+        toast.success('Invitation accepted!')
         updateUser?.()
       } else {
-        alert('Failed to accept invitation. Please try again.')
+        toast.error('Failed to accept invitation. Please try again.')
       }
     },
     [updateUser]
@@ -117,7 +118,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
 
   const handleSubmitChangeGroupName = useCallback(async () => {
     if (!groupFormData?.group_name) {
-      alert('Grouname must not be empty')
+      toast.error('Group Name must not be empty')
       return
     }
     if (!userGroup?.group_id) {
@@ -130,7 +131,7 @@ export const GroupDetails = (props: GroupDetailsProps) => {
       updateUser?.()
       setUi((current) => ({ ...current, isEditUserName: false }))
     } catch (e) {
-      alert('error changing Groupname')
+      toast.error('error changing Groupname')
       setFormData((current) => ({
         ...current,
         group_name: userGroup?.group_name ?? '',
@@ -161,14 +162,16 @@ export const GroupDetails = (props: GroupDetailsProps) => {
           removeUserId
         ).query()
         if (resDeletion.data?.success) {
-          console.log(resDeletion)
+          console.debug(resDeletion)
           updateUser?.()
         } else {
           throw resDeletion
         }
       } catch (e) {
         console.error(e)
-        alert('An error has occurred while removing the user from the group')
+        toast.error(
+          'An error has occurred while removing the user from the group'
+        )
       }
     },
     [updateUser, userGroup]
@@ -185,14 +188,16 @@ export const GroupDetails = (props: GroupDetailsProps) => {
           group_admin_user_id: newAdminUserId,
         })
         if (resChangeAdmin.data?.success) {
-          console.log(resChangeAdmin)
+          console.debug(resChangeAdmin)
           updateUser?.()
         } else {
           throw resChangeAdmin
         }
       } catch (e) {
         console.error(e)
-        alert('An error has occurred while removing the user from the group')
+        toast.error(
+          'An error has occurred while removing the user from the group'
+        )
       }
     },
     [updateUser, userGroup]

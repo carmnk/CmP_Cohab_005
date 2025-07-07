@@ -1,12 +1,11 @@
 import { Button, CSelect2, Flex, Modal } from '@cmk/fe_utils'
-import { Avatar, Box, Typography } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { AppControllerData } from '../../appController/types/appControllerData'
 import { ScheduleEntry } from '../../appController/types/scheduleEntry'
 import { CDateTimePicker } from '../DateTimePicker'
 import moment, { Moment } from 'moment'
 import { formatUserName } from '../../utils/formatUsername'
-import { getUserInitials } from '../../utils/getUserInitials'
 import { mdiDelete } from '@mdi/js'
 import { CAvatar } from '../CAvatar'
 

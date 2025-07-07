@@ -9,6 +9,9 @@ import {
   Modal,
 } from '@cmk/fe_utils'
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Box,
   Chip,
   Stack,
@@ -32,6 +35,7 @@ import {
   mdiAccount,
   mdiAccountGroup,
   mdiChevronDoubleRight,
+  mdiChevronDown,
   mdiDelete,
   mdiFileTree,
   mdiFilter,
@@ -44,6 +48,9 @@ import { AddTaskTreeItem } from './AddTaskTreeItem'
 import { Task } from '../../appController/types/tasks'
 import { AppControllerActions } from '../../appController/useAppControllerActions'
 import { CAvatar } from '../../components/CAvatar'
+import toast from 'react-hot-toast'
+import { User } from '../../appController/types/user'
+import { getRecursiveParentTaskIds } from '../../utils/getRecursiveParentTaskIds'
 
 const taskStatusValues = ['open', 'completed']
 const taskStatusOptions = taskStatusValues.map((val) => ({
@@ -77,15 +84,6 @@ export type TaskModalProps = {
   task_id?: number
 }
 
-export const getRecursiveParentTaskIds = (task_id: number, tasks: Task[]) => {
-  const task = tasks?.find((t) => t.task_id === task_id)
-  const parentId = task?.parent_task_id
-  const recursiveTasks = parentId
-    ? getRecursiveParentTaskIds(parentId, tasks)
-    : []
-  return [parentId, ...recursiveTasks].filter((val) => val && val !== 0)
-}
-
 const formatFormData = (formDataIn: any) => ({
   ...formDataIn,
   owner_group_id:
@@ -111,7 +109,7 @@ const validateFormData = (formData: Task) => {
   return true
 }
 
-const getInitialFormData = (task?: Task | null) =>
+const getInitialFormData = (user: User, task?: Task | null) =>
   task
     ? ({
         ...task,
@@ -120,7 +118,7 @@ const getInitialFormData = (task?: Task | null) =>
             ? moment(task?.due_datetime)
             : task?.due_datetime,
       } as unknown as Task)
-    : defaultTaskData
+    : { ...defaultTaskData, task_editor_user_id: user?.user_id }
 
 export const TaskModal = (props: TaskModalProps) => {
   const {
@@ -132,6 +130,7 @@ export const TaskModal = (props: TaskModalProps) => {
     deleteTask,
     onSwitchTask,
   } = props
+  const prevTasks = useRef(data?.tasks)
   const theme = useTheme()
   const isMinSmViewport = useMediaQuery(theme.breakpoints.up('sm'))
   const isMinLgViewport = useMediaQuery(theme.breakpoints.up('lg'))
@@ -141,7 +140,22 @@ export const TaskModal = (props: TaskModalProps) => {
     isEditorSelectOpen: false,
     isGroupSelectOpen: false,
     showOnlyOpenSubtasks: false,
+    openTaskDetailsAccordion: true,
+    openSubTasksAccordion: false,
   })
+
+  const handleToggleTaskDetailsAccordion = useCallback(() => {
+    setUi((current) => ({
+      ...current,
+      openTaskDetailsAccordion: !current?.openTaskDetailsAccordion,
+    }))
+  }, [])
+  const handleToggleSubtasksAccordion = useCallback(() => {
+    setUi((current) => ({
+      ...current,
+      openSubTasksAccordion: !current?.openSubTasksAccordion,
+    }))
+  }, [])
 
   const existingTask = useMemo(
     () =>
@@ -151,7 +165,7 @@ export const TaskModal = (props: TaskModalProps) => {
   )
 
   const [formData, setFormData] = useState<Task>(
-    getInitialFormData(existingTask) as Task
+    getInitialFormData(data?.user as User, existingTask) as Task
   )
   const editorRef = useRef(null)
   const groupSelectRef = useRef(null)
@@ -182,7 +196,7 @@ export const TaskModal = (props: TaskModalProps) => {
       formDataAdj.owner_user_id = data?.user?.user_id
     }
     if (!validateFormData(formDataAdj)) {
-      alert('Formdata incomplete')
+      toast('Formdata incomplete')
       return
     }
     if (formDataAdj?.due_datetime) {
@@ -408,12 +422,6 @@ export const TaskModal = (props: TaskModalProps) => {
 
   const handleSubmitNewTask = useCallback(
     (task_name, parent_task_id) => {
-      console.log(
-        'Please create a new task with task_name: ',
-        task_name,
-        ' and parent_id: ',
-        parent_task_id
-      )
       const newTask: Omit<Task, 'task_id' | 'created_at'> = {
         task_name,
         task_description: '',
@@ -503,7 +511,7 @@ export const TaskModal = (props: TaskModalProps) => {
     if (!task_id) {
       return
     }
-    setFormData(getInitialFormData(existingTask) as Task)
+    setFormData(getInitialFormData(data?.user as User, existingTask) as Task)
   }, [task_id])
 
   const recursiveParentTasks = useMemo(
@@ -524,7 +532,10 @@ export const TaskModal = (props: TaskModalProps) => {
   }, [[]])
 
   useEffect(() => {
-    scrollDown?.()
+    if (data?.tasks?.length > prevTasks?.current?.length) {
+      scrollDown?.()
+    }
+    prevTasks.current = data?.tasks
   }, [data?.tasks, scrollDown])
 
   return (
@@ -579,61 +590,87 @@ export const TaskModal = (props: TaskModalProps) => {
               )}
             </Box>
           </Flex>
-          <Flex
-            mt="1rem"
-            alignItems="flex-start"
-            justifyContent="space-between"
-            gap="2rem"
-          >
-            <Box flex={1}>
-              {/* <Typography variant="h6"> */}
+          <Box mt="0.5rem">
+            <Accordion
+              square
+              disableGutters
+              expanded={ui.openTaskDetailsAccordion}
+              elevation={0}
+              variant="outlined"
+              onChange={handleToggleTaskDetailsAccordion}
+            >
+              <AccordionSummary
+                expandIcon={<Icon path={mdiChevronDown} size={1} />}
+                aria-controls="panel1-content"
+                id="panel1-header"
+              >
+                <Typography component="span">Task Details</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Flex
+                  // mt="1rem"
+                  alignItems="flex-start"
+                  justifyContent="space-between"
+                  gap="2rem"
+                >
+                  <Box flex={1}>
+                    {/* <Typography variant="h6"> */}
 
-              {/* </Typography> */}
-              <Box>
-                <CTextField
-                  name="task_name"
-                  label="Task Name"
-                  value={formData.task_name}
-                  size="small"
-                  onChange={handleChange}
-                />
-              </Box>
-              {!isMinSmViewport && <Box mt="0.0rem">{metaFields}</Box>}
-              <Box>
-                <CTextField
-                  name="task_description"
-                  label="Task Description"
-                  value={formData.task_description}
-                  multiline
-                  minRows={3}
-                  size="small"
-                  onChange={handleChange}
-                />
-              </Box>
-            </Box>
+                    {/* </Typography> */}
+                    <Box>
+                      <CTextField
+                        name="task_name"
+                        label="Task Name"
+                        value={formData.task_name}
+                        size="small"
+                        onChange={handleChange}
+                      />
+                    </Box>
+                    {!isMinSmViewport && <Box mt="0.0rem">{metaFields}</Box>}
+                    <Box>
+                      <CTextField
+                        name="task_description"
+                        label="Task Description"
+                        value={formData.task_description}
+                        multiline
+                        minRows={3}
+                        size="small"
+                        onChange={handleChange}
+                      />
+                    </Box>
+                  </Box>
 
-            {isMinSmViewport && metaFields}
-          </Flex>
-          <Flex
-            mb={'0.25rem'}
-            alignItems="center"
-            gap="1rem"
-            justifyContent="space-between"
-          >
-            <Typography>Subtasks ({recursiveSubTasks?.length ?? 0})</Typography>
-            <Button
-              borderRadius={9999}
-              label={
-                // ui?.showOnlyOpenSubtasks ?
-                'Only Open'
-              }
-              icon={ui?.showOnlyOpenSubtasks ? mdiFilterOff : mdiFilter}
-              fontColor="#333"
-              size="small"
-              color={ui?.showOnlyOpenSubtasks ? 'primary' : 'inherit'}
-              onClick={handleToggleShowOnlyOpenSubtasks}
-            />
-          </Flex>
+                  {isMinSmViewport && metaFields}
+                </Flex>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+
+          {task_id && (
+            <Flex
+              mb={'0.25rem'}
+              mt="1rem"
+              alignItems="center"
+              gap="1rem"
+              justifyContent="space-between"
+            >
+              <Typography>
+                Subtasks ({recursiveSubTasks?.length ?? 0})
+              </Typography>
+              <Button
+                borderRadius={9999}
+                label={
+                  // ui?.showOnlyOpenSubtasks ?
+                  'Only Open'
+                }
+                icon={ui?.showOnlyOpenSubtasks ? mdiFilterOff : mdiFilter}
+                fontColor="#333"
+                size="small"
+                color={ui?.showOnlyOpenSubtasks ? 'primary' : 'inherit'}
+                onClick={handleToggleShowOnlyOpenSubtasks}
+              />
+            </Flex>
+          )}
         </Box>
       }
       open={open}
@@ -654,101 +691,100 @@ export const TaskModal = (props: TaskModalProps) => {
           mt={'-1rem'}
           sx={{ '& .MuiSimpleTreeView-root': { maxWidth: 'none' } }}
         >
-          {task_id ? (
-            <Box
-              // maxHeight={
-              //   isMinLgViewport ? '540px' : isMinSmViewport ? '320px' : '220px'
-              // }
-              flex={1}
-              overflow="auto"
-            >
-              <CTreeView
-                items={subTasksTreeItems}
-                actions={(item) =>
-                  item?.insertItem
-                    ? []
-                    : [
-                        // {
-                        //   label: 'open',
+          {
+            task_id ? (
+              <Box
+                // maxHeight={
+                //   isMinLgViewport ? '540px' : isMinSmViewport ? '320px' : '220px'
+                // }
+                flex={1}
+                overflow="auto"
+              >
+                <CTreeView
+                  items={subTasksTreeItems}
+                  actions={(item) =>
+                    item?.insertItem
+                      ? []
+                      : [
+                          // {
+                          //   label: 'open',
 
-                        //   icon: mdiOpenInNew,
-                        //   variant: 'outlined',
-                        //   action: () => {
-                        //     console.log('SHOULD SWITCH TASK', item)
-                        //     onSwitchTask(item?.task_id)
-                        //   },
-                        //   tooltip: 'open subtask as maintask',
-                        // },
-                        {
-                          label: 'create subtask',
-                          variant: 'outlined',
-                          icon: (
-                            <Box
-                              position="relative"
-                              top={0}
-                              height={24}
-                              width={24}
-                              overflow="hidden"
-                              // onClick={() =>
-                              //   handleSubmitNewTask('New Task', item?.task_id)
-                              // }
-                            >
+                          //   icon: mdiOpenInNew,
+                          //   variant: 'outlined',
+                          //   action: () => {
+                          //     onSwitchTask(item?.task_id)
+                          //   },
+                          //   tooltip: 'open subtask as maintask',
+                          // },
+                          {
+                            label: 'create subtask',
+                            variant: 'outlined',
+                            icon: (
                               <Box
-                                position="absolute"
-                                top={-2}
-                                left={2}
+                                position="relative"
+                                top={0}
                                 height={24}
+                                width={24}
+                                overflow="hidden"
+                                // onClick={() =>
+                                //   handleSubmitNewTask('New Task', item?.task_id)
+                                // }
                               >
-                                <Icon path={mdiFileTree} size={0.85} />
+                                <Box
+                                  position="absolute"
+                                  top={-2}
+                                  left={2}
+                                  height={24}
+                                >
+                                  <Icon path={mdiFileTree} size={0.85} />
+                                </Box>
+                                <Box
+                                  position="absolute"
+                                  top={-13}
+                                  left={12}
+                                  height={24}
+                                >
+                                  <Icon path={mdiPlus} size={0.5} />
+                                </Box>
                               </Box>
-                              <Box
-                                position="absolute"
-                                top={-13}
-                                left={12}
-                                height={24}
-                              >
-                                <Icon path={mdiPlus} size={0.5} />
-                              </Box>
-                            </Box>
-                          ) as any,
-                          action: () => {
-                            handleSubmitNewTask('New Task', item?.task_id)
+                            ) as any,
+                            action: () => {
+                              handleSubmitNewTask('New Task', item?.task_id)
+                            },
+                            tooltip: 'create another subtask',
                           },
-                          tooltip: 'create another subtask',
-                        },
-                        {
-                          label: 'delete',
+                          {
+                            label: 'delete',
 
-                          icon: mdiDelete,
-                          variant: 'outlined',
-                          action: () => {
-                            deleteTask(item?.task_id)
+                            icon: mdiDelete,
+                            variant: 'outlined',
+                            action: () => {
+                              deleteTask(item?.task_id)
+                            },
+                            tooltip: 'delete subtask',
                           },
-                          tooltip: 'delete subtask',
-                        },
-                        {
-                          label: 'edit',
+                          {
+                            label: 'edit',
 
-                          icon: mdiPencil,
-                          variant: 'outlined',
-                          action: () => {
-                            console.log('SHOULD SWITCH TASK', item)
-                            onSwitchTask(item?.task_id)
+                            icon: mdiPencil,
+                            variant: 'outlined',
+                            action: () => {
+                              onSwitchTask(item?.task_id)
+                            },
+                            tooltip: 'edit subtask',
                           },
-                          tooltip: 'edit subtask',
-                        },
-                      ]
-                }
-              />
-              <AddTaskTreeItem
-                parent_task_id={task_id as number}
-                onSubmitNewTask={handleSubmitNewTask}
-                // onFocus={subTasksscrollContainerRef}
-              />
-            </Box>
-          ) : (
-            <Typography>Please save the tasks first</Typography>
-          )}
+                        ]
+                  }
+                />
+                <AddTaskTreeItem
+                  parent_task_id={task_id as number}
+                  onSubmitNewTask={handleSubmitNewTask}
+                  // onFocus={subTasksscrollContainerRef}
+                />
+              </Box>
+            ) : null
+            // <Typography>Please save the tasks first</Typography>
+          }
         </Box>
       </Stack>
       <DropdownMenu

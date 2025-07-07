@@ -4,13 +4,12 @@ import { Typography, Chip, Box } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import { Fragment } from 'react/jsx-runtime'
 import { formatUserName } from '../../utils/formatUsername'
-import { getRecursiveParentTaskIds } from '../tasks/TaskModal'
 import Icon from '@mdi/react'
 import { UserChange } from '../../appController/types/dataChanges'
-import { PublicUser } from '../../appController/types/publicUser'
 import moment from 'moment'
 import { useMemo } from 'react'
 import { AppControllerData } from '../../appController/types/appControllerData'
+import { getRecursiveParentTaskIds } from '../../utils/getRecursiveParentTaskIds'
 
 export type UserChangeUserOutputProps = {
   dc: UserChange
@@ -81,7 +80,6 @@ export const UserChangeUserOutput = (props: UserChangeUserOutputProps) => {
         : changeDatetime.format('DD.MM.YYYY HH:mm')) + ' - '
     : ''
 
-  console.log('EEINST ', entityInstance, idFieldName)
   return (
     <Flex
       alignItems={'flex-start'}
@@ -137,7 +135,7 @@ export const UserChangeUserOutput = (props: UserChangeUserOutputProps) => {
                     clickable
                     label={task?.task_name}
                     onClick={() => {
-                      navigate('tasks')
+                      navigate('tasks/?task_id=' + (task?.task_id ?? '-'))
                     }}
                   />
                   {tIdx !== recursiveParentTasks?.length - 1 && (
@@ -154,9 +152,37 @@ export const UserChangeUserOutput = (props: UserChangeUserOutputProps) => {
             label={getEntityLabel(entityInstance, dc?.entity_name, data)}
             onClick={() => {
               if (dc?.entity_name === 'tasks') {
-                navigate('tasks')
+                // will never occure
+                navigate('tasks/?task_id=' + (dc?.entity_instance_id ?? '-'))
               } else if (dc?.entity_name === 'schedules') {
-                navigate('schedules')
+                navigate(
+                  'schedules/?schedule_id=' + (dc?.entity_instance_id ?? '-')
+                )
+              } else if (dc?.entity_name === 'schedule_entrys') {
+                const scheduleEntry =
+                  dc?.entity_instance_id &&
+                  data?.schedules
+                    ?.map((sched) => sched.schedule_entrys)
+                    .flat()
+                    ?.find(
+                      (entry) =>
+                        entry.schedule_entry_id ===
+                        parseInt(dc?.entity_instance_id as any)
+                    )
+                console.log(
+                  'scheduleEntry',
+                  scheduleEntry,
+                  data?.schedules?.map((sched) => sched.schedule_entrys).flat()
+                )
+                if (!scheduleEntry) {
+                  return
+                }
+                navigate(
+                  'schedules/?schedule_id=' +
+                    (scheduleEntry?.schedule_id ?? '-') +
+                    '&schedule_entry_id=' +
+                    (dc?.entity_instance_id ?? '-')
+                )
               }
             }}
           />

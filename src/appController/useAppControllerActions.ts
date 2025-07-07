@@ -9,6 +9,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 import { AppControllerUi } from './types/appControllerUi'
 import { AppControllerDataChanges } from './types/dataChanges'
+import toast from 'react-hot-toast'
 
 export type AppControllerActionsParams = {
   setData: Dispatch<SetStateAction<AppControllerData>>
@@ -36,13 +37,13 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
   const logoutUser = useCallback(async () => {
     const resLogout = await API.logoutUser.query()
     const success = resLogout?.data?.success
+    console.debug('logutRes', resLogout)
     if (success) {
-      alert('Logout Successfull')
+      toast.success('Logout Successfull')
       setData((current) => ({ ...current, user: null, tasks: [] }))
       navigate('/login')
     } else {
-      console.log('logutRes', resLogout)
-      alert('Error logout')
+      toast.error('Error logout')
     }
   }, [navigate, setData])
 
@@ -103,15 +104,15 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
       }
       try {
         const resDeletion = await API.deleteTask(task_id).query()
+        console.debug(resDeletion)
         if (resDeletion.data?.success) {
-          console.log(resDeletion)
           getTasks()
         } else {
           throw resDeletion
         }
       } catch (e) {
         console.error(e)
-        alert('an error has occured')
+        toast.error('An error has occured')
       }
     },
     [getTasks]
@@ -135,7 +136,7 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
         }
         await getTasks()
       } else {
-        alert('An error has occured')
+        toast.error('An error has occured')
       }
     },
     [getTasks, setUi]
@@ -149,32 +150,32 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
         : API.createSchedule.query
       const resQuery = await query(formData)
       if (resQuery?.data?.success) {
-        // alert('Successfully saved')
+        toast.success('Schedule successfully saved')
         setUi((current) => ({ ...current, scheduleModal: null }))
         await getSchedules()
       } else {
-        alert('An error has occured')
+        toast.error('An error has occured')
       }
     },
     [getSchedules, setUi]
   )
   const deleteSchedule = useCallback(
     async (schedule_id: number) => {
-      console.log('deleteSchedule', schedule_id)
       if (!schedule_id) {
         return
       }
       try {
         const resDeletion = await API.deleteSchedule(schedule_id).query()
+        console.debug(resDeletion)
         if (resDeletion.data?.success) {
-          console.log(resDeletion)
+          toast.success('schedule successfully deleted')
           getSchedules()
         } else {
           throw resDeletion
         }
       } catch (e) {
         console.error(e)
-        alert('an error has occured')
+        toast.error('An error has occured')
       }
     },
     [getSchedules]
@@ -188,18 +189,17 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
         : API.createScheduleEntry.query
       const resQuery = await query(formData)
       if (resQuery?.data?.success) {
-        // alert('Successfully saved')
+        toast.success('schedule successfully saved')
         setUi((current) => ({ ...current, scheduleModal: null }))
         await getSchedules()
       } else {
-        alert('An error has occured')
+        toast.error('An error has occured')
       }
     },
     [getSchedules, setUi]
   )
   const deleteScheduleEntry = useCallback(
     async (schedule_entry_id: number) => {
-      console.log('deleteScheduleEntry', schedule_entry_id)
       if (!schedule_entry_id) {
         return
       }
@@ -207,15 +207,16 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
         const resDeletion = await API.deleteScheduleEntry(
           schedule_entry_id
         ).query()
+        console.debug(resDeletion)
         if (resDeletion.data?.success) {
-          console.log(resDeletion)
+          toast.success('schedule successfully deleted')
           getSchedules()
         } else {
           throw resDeletion
         }
       } catch (e) {
         console.error(e)
-        alert('an error has occured')
+        toast.error('An error has occured')
       }
     },
     [getSchedules]
@@ -234,6 +235,52 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
     })
   }, [setDataChanges])
 
+  const openNewScheduleModal = useCallback(() => {
+    setUi((current) => ({ ...current, scheduleModal: true }))
+  }, [setUi])
+
+  const openEditScheduleModal = useCallback(
+    (schedule_id: number) => {
+      setUi((current) => ({
+        ...current,
+        scheduleModal: schedule_id,
+      }))
+    },
+    [setUi]
+  )
+  const closeScheduleModal = useCallback(() => {
+    setUi((current) => ({ ...current, scheduleModal: null }))
+  }, [setUi])
+
+  const openSchedulesEntrysModal = useCallback(
+    (schedule_id: number) => {
+      setUi((current) => ({
+        ...current,
+        scheduleEntryModal: schedule_id,
+      }))
+    },
+    [setUi]
+  )
+  const closeScheduleEntryModal = useCallback(() => {
+    setUi((current) => ({
+      ...current,
+      scheduleEntryModal: null,
+    }))
+  }, [setUi])
+
+  const openNewTaskModal = useCallback(() => {
+    setUi((current) => ({ ...current, tasksModal: true }))
+  }, [setUi])
+  const closTaskModal = useCallback(() => {
+    setUi((current) => ({ ...current, tasksModal: null }))
+  }, [setUi])
+  const openEditTaskModal = useCallback(
+    (task_id: number) => {
+      setUi((current) => ({ ...current, tasksModal: task_id }))
+    },
+    [setUi]
+  )
+
   const actions = useMemo(() => {
     return {
       getTasks,
@@ -249,7 +296,16 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
       deleteSchedule,
       createOrEditScheduleEntry,
       deleteScheduleEntry,
+      // ui
       toggleDrawerOpen,
+      openNewScheduleModal,
+      openEditScheduleModal,
+      openSchedulesEntrysModal,
+      closeScheduleModal,
+      closeScheduleEntryModal,
+      openEditTaskModal,
+      closTaskModal,
+      openNewTaskModal,
     }
   }, [
     getTasks,
@@ -265,7 +321,16 @@ export const useAppControllerActions = (params: AppControllerActionsParams) => {
     deleteSchedule,
     createOrEditScheduleEntry,
     deleteScheduleEntry,
+    // ui
     toggleDrawerOpen,
+    openNewScheduleModal,
+    openEditScheduleModal,
+    openSchedulesEntrysModal,
+    closeScheduleModal,
+    closeScheduleEntryModal,
+    openEditTaskModal,
+    closTaskModal,
+    openNewTaskModal,
   ])
   return actions
 }

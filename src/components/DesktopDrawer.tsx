@@ -45,8 +45,6 @@ export const DesktopDrawer = (props: DesktopDrawerProps) => {
     ? adjPathName1.slice(1)
     : adjPathName1
 
-  console.log('DRAWER', isMinSmViewport)
-
   return (
     <SwipeableDrawer
       open={!!ui.drawerOpen}

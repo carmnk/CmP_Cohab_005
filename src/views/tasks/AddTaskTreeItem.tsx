@@ -30,7 +30,6 @@ export const AddTaskTreeItem = (props: AddTaskTreeItemProps) => {
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      console.log('EVENT', e)
       const key = e?.key
       if (key !== 'Enter') {
         return

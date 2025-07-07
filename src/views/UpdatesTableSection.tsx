@@ -1,17 +1,5 @@
-import {
-  Box,
-  TablePagination,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from '@mui/material'
-import {
-  ChangeEvent,
-  PointerEvent,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react'
+import { Box, TablePagination, Typography } from '@mui/material'
+import { ChangeEvent, useCallback, useState } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { dataChangesTableDef } from './tableDefs/dataChangesTableDef'
 import { AppControllerData } from '../appController/types/appControllerData'
@@ -34,16 +22,16 @@ export type UpdatesTableSectionProps = {
 export const UpdatesTableSection = (props: UpdatesTableSectionProps) => {
   const { data, dataChanges } = props
 
-  const theme = useTheme()
-  const isMinSmViewport = useMediaQuery(theme.breakpoints.up('sm'))
-  const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
-  const isMinLgViewport = useMediaQuery(theme.breakpoints.up('lg'))
+  // const theme = useTheme()
+  // const isMinSmViewport = useMediaQuery(theme.breakpoints.up('sm'))
+  // const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
+  // const isMinLgViewport = useMediaQuery(theme.breakpoints.up('lg'))
 
   const [ui, setUi] = useState({
     page: 0,
     itemsPerPage: 10,
   })
-  const [expandedIds, setExpandedIds] = useState<string[]>([])
+  // const [expandedIds, setExpandedIds] = useState<string[]>([])
 
   const handleChangePage = useCallback((e: unknown, newPage: number) => {
     setUi((current) => ({ ...current, page: newPage }))
@@ -51,28 +39,27 @@ export const UpdatesTableSection = (props: UpdatesTableSectionProps) => {
   const handleChangeItemsPerPage = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       const newSize = event?.target?.value
-      console.log('NERW SIZE ', newSize)
       setUi((current) => ({ ...current, itemsPerPage: parseInt(newSize) }))
     },
     []
   )
-  const handleToggleExpandedId = useCallback(
-    (id: string) => {
-      setExpandedIds((prev) =>
-        prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-      )
-    },
-    [setExpandedIds]
-  )
+  // const handleToggleExpandedId = useCallback(
+  //   (id: string) => {
+  //     setExpandedIds((prev) =>
+  //       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+  //     )
+  //   },
+  //   [setExpandedIds]
+  // )
 
-  const tableDef = useMemo(() => {
-    return dataChangesTableDef(
-      data,
-      dataChanges,
-      expandedIds,
-      handleToggleExpandedId
-    )
-  }, [data, dataChanges, expandedIds, handleToggleExpandedId])
+  // const tableDef = useMemo(() => {
+  //   return dataChangesTableDef(
+  //     data,
+  //     dataChanges,
+  //     expandedIds,
+  //     handleToggleExpandedId
+  //   )
+  // }, [data, dataChanges, expandedIds, handleToggleExpandedId])
 
   return (
     <Box mt={'1rem'} minHeight="8rem">

@@ -35,7 +35,6 @@ export const SchedulesSection = (props: TasksSectionProps) => {
     [data?.schedules]
   )
 
-  console.log('allScheduleEntrys', allScheduleEntrys)
   return allScheduleEntrys?.length ? (
     <Typography>
       Your next schedule is set for{' '}

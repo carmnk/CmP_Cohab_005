@@ -6,18 +6,11 @@ import { AppHtmlRenderer } from './AppHtmlRenderer'
 import axios from 'axios'
 import packageJson from '../package.json'
 import { BrowserRouter } from 'react-router-dom'
-import { ThemeProvider } from '@mui/material'
+import { Portal, ThemeProvider } from '@mui/material'
 import { muiLightSiteTheme } from './theme/muiTheme'
 declare const BASE_URL: string
 
 const prepareSerializesState = (appData: any) => {
-  console.log(
-    'response editorstate pre-prep',
-    appData,
-    defaultEditorState(),
-    BASE_ELEMENT_MODELS
-    // transformedState
-  )
   const transformedState = deserializeEditorState(
     appData as any,
     defaultEditorState(),
@@ -83,7 +76,9 @@ export const App = () => {
       <BrowserRouter basename={packageJson?.homepage}>
         <ThemeProvider theme={muiLightSiteTheme}>
           <AppHtmlRenderer appData={appData} />
-          <Toaster />
+          <Portal>
+            <Toaster />
+          </Portal>
         </ThemeProvider>
       </BrowserRouter>
     )

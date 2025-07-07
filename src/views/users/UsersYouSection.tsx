@@ -7,6 +7,7 @@ import { API } from '../../api/API'
 import { getUserInitials } from '../../utils/getUserInitials'
 import { AppControllerData } from '../../appController/types/appControllerData'
 import { CAvatar } from '../../components/CAvatar'
+import toast from 'react-hot-toast'
 
 export type UsersYouSectionProps = {
   data: AppControllerData
@@ -41,7 +42,7 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
 
   const handleSubmitChangeUserName = useCallback(async () => {
     if (!formData?.user_name) {
-      alert('Username must not be empty')
+      toast.error('Username must not be empty')
       return
     }
     try {
@@ -49,7 +50,7 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
       updateUser?.()
       setUi((current) => ({ ...current, isEditUserName: false }))
     } catch (e) {
-      alert('error changing Username')
+      toast.error('error changing Username')
       setFormData((current) => ({
         ...current,
         user_name: formatUserName(user),
@@ -61,7 +62,7 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
   const handleSubmitChangeUserColor = useCallback(
     async (newValue: string) => {
       if (!newValue) {
-        alert('Usercolor must not be empty')
+        toast.error('Usercolor must not be empty')
         return
       }
       try {
@@ -70,7 +71,7 @@ export const UsersYouSection = (props: UsersYouSectionProps) => {
         })
         updateUser?.()
       } catch (e) {
-        alert('error changing Username')
+        toast.error('error changing Username')
         setFormData((current) => ({
           ...current,
           user_color: user?.user_color as string,

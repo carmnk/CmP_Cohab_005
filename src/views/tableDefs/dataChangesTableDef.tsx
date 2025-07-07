@@ -1,11 +1,9 @@
-import { Button, Flex } from '@cmk/fe_utils'
+import { Flex } from '@cmk/fe_utils'
 import {
   mdiAccount,
   mdiAccountGroup,
   mdiArrowRight,
   mdiCheck,
-  mdiChevronRight,
-  mdiChevronUp,
   mdiDelete,
   mdiPencil,
   mdiPlus,
@@ -35,8 +33,6 @@ export const dataChangesTableDef = (
       id: item?.user_change_id,
     }))
     .flat()
-
-  console.log('ROWS', rows)
 
   return {
     data: rows, //[{ column1: "ABCD", column2: "EFGH" }],
@@ -297,7 +293,6 @@ export const dataChangesTableDef = (
               return dc.user_change_id === userChangeItemId
             }
           )
-          console.log('item', item, userChangeItemId, matchingDataChanges)
           return (
             <Stack justifyContent={'center'} height="100%">
               {matchingDataChanges?.length ? (

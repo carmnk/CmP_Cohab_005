@@ -2,12 +2,9 @@ import React, { useCallback, useEffect, useMemo } from 'react'
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import {
   BASE_ELEMENT_MODELS,
-  Button,
   EditorStateDbDataType,
   ElementModel,
-  Flex,
   HtmlRenderer,
-  ListNavigation,
   query,
   useEditorRendererController,
 } from '@cmk/fe_utils'
@@ -24,21 +21,6 @@ import { UsersYouSection } from './views/users/UsersYouSection'
 import { TasksTableSection } from './views/tasks/TasksTableSection'
 import { UpdatesTableSection } from './views/UpdatesTableSection'
 import { SchedulesTableSection } from './views/schedules/SchedulesTableSection'
-import {
-  Box,
-  Divider,
-  Popover,
-  Stack,
-  SwipeableDrawer,
-  Typography,
-} from '@mui/material'
-import { CAvatar } from './components/CAvatar'
-import {
-  mdiAccountGroup,
-  mdiArrowTopRight,
-  mdiCalendar,
-  mdiCheckboxMarkedCirclePlusOutline,
-} from '@mdi/js'
 
 declare const BASE_URL: string
 
@@ -52,6 +34,9 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const forcedLocation = searchParams.get('location')
+  const scheduleIdSearchParam = searchParams.get('schedule_id')
+  const scheduleEntryIdSearchParam = searchParams.get('schedule_entry_id')
+  const taskIdSearchParam = searchParams.get('task_id')
 
   const {
     editorState,
@@ -75,24 +60,13 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     logoutUser,
     getDataChanges,
     toggleDrawerOpen,
+    openNewTaskModal,
+    openEditTaskModal,
+    closTaskModal,
   } = actions
 
   const [iconData, setIconData] = React.useState<Record<string, string>>({})
   const [userImage, setUserImage] = React.useState<string | null>(null)
-
-  const handleOpenNewTaskModal = useCallback(() => {
-    setUi((current) => ({ ...current, tasksModal: true }))
-  }, [])
-  const handleClosTaskModal = useCallback(() => {
-    setUi((current) => ({ ...current, tasksModal: null }))
-  }, [])
-  const handleOpenEditTaskModal = useCallback((task_id: number) => {
-    console.log('handleOpenEditTaskModal', task_id)
-    setUi((current) => ({ ...current, tasksModal: task_id }))
-  }, [])
-  const handleSwitchTaskInModal = useCallback((newTaskId: number) => {
-    setUi((current) => ({ ...current, tasksModal: newTaskId }))
-  }, [])
 
   useEffect(() => {
     const basePath = BASE_URL ?? '/'
@@ -156,9 +130,12 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     : location.pathname === '/'
     ? 'index'
     : location.pathname.replace(BASE_URL, '') || 'index'
-  const adjPathName = adjPathName1.startsWith('/')
+  const adjPathName2 = adjPathName1.startsWith('/')
     ? adjPathName1.slice(1)
     : adjPathName1
+  const adjPathName = adjPathName2.endsWith('/')
+    ? adjPathName2.slice(0, -1)
+    : adjPathName2
 
   console.log(
     'adjPathName',
@@ -194,7 +171,7 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
         '4cf5b14d-6151-4b82-9cb4-95ac4185c496': { sx: { display: 'none' } },
         'e2bea8b3-41a1-400e-87cc-f610cf7fdfe6': {
           onClick: () => {
-            handleOpenNewTaskModal()
+            openNewTaskModal()
           },
         },
         '29dc4c34-6f8a-40bb-bfcc-d8ccb0f0bada': {
@@ -287,8 +264,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
         data={data}
         deleteTask={deleteTask}
         createOrEditTask={createOrEditTask}
-        openTaskModal={handleOpenEditTaskModal}
-        openNewTaskModal={handleOpenNewTaskModal}
+        openTaskModal={openEditTaskModal}
+        openNewTaskModal={openNewTaskModal}
       />
     )
     staticInjections.elementReplacementComponent[
@@ -298,8 +275,8 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
         data={data}
         deleteTask={deleteTask}
         createOrEditTask={createOrEditTask}
-        openTaskModal={handleOpenEditTaskModal}
-        openNewTaskModal={handleOpenNewTaskModal}
+        openTaskModal={openEditTaskModal}
+        openNewTaskModal={openNewTaskModal}
         dataChanges={dataChanges}
       />
     )
@@ -309,8 +286,9 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     navigateToGoogleLogin,
     data,
     userImage,
-    handleOpenEditTaskModal,
-    handleOpenNewTaskModal,
+    openEditTaskModal,
+    openNewTaskModal,
+    ui,
     deleteTask,
     getUser,
     logoutUser,
@@ -353,6 +331,48 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     getSchedules()
   }, [])
 
+  useEffect(() => {
+    const scheduleIdParamNumber = scheduleIdSearchParam
+      ? parseInt(scheduleIdSearchParam)
+      : null
+    if (
+      !scheduleIdSearchParam ||
+      Number.isNaN(scheduleIdParamNumber) ||
+      !scheduleIdParamNumber
+    ) {
+      return
+    }
+
+    const scheduleEntryIdParamNumber = scheduleEntryIdSearchParam
+      ? parseInt(scheduleEntryIdSearchParam)
+      : null
+    if (
+      scheduleEntryIdSearchParam &&
+      !Number.isNaN(scheduleEntryIdParamNumber)
+    ) {
+      actions.openSchedulesEntrysModal(scheduleIdParamNumber)
+    } else {
+      actions.openEditScheduleModal(scheduleIdParamNumber)
+    }
+  }, [scheduleIdSearchParam, scheduleEntryIdSearchParam])
+
+  useEffect(() => {
+    const taskIdSearchParamNumber = taskIdSearchParam
+      ? parseInt(taskIdSearchParam)
+      : null
+    if (
+      !taskIdSearchParam ||
+      Number.isNaN(taskIdSearchParamNumber) ||
+      !taskIdSearchParamNumber
+    ) {
+      return
+    }
+
+    if (taskIdSearchParam && !Number.isNaN(taskIdSearchParamNumber)) {
+      actions.openEditTaskModal(taskIdSearchParamNumber)
+    }
+  }, [taskIdSearchParam])
+
   return ui.initialized ? (
     <>
       <HtmlRenderer
@@ -378,41 +398,12 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
           }
           data={data}
           open={!!ui.tasksModal}
-          onClose={handleClosTaskModal}
+          onClose={closTaskModal}
           createOrEditTask={createOrEditTask}
           deleteTask={deleteTask}
-          onSwitchTask={handleSwitchTaskInModal}
+          onSwitchTask={openEditTaskModal}
         />
       )}
-
-      {/* <Box
-        // display="none"
-        position="fixed"
-        zIndex={10000000000}
-        top={0}
-        left={0}
-        overflow="auto"
-        width="100%"
-        height="100%"
-      >
-        <Box width="100%" minWidth={520} height="100%">
-          <DataGrid
-            autosizeOnMount
-            autosizeOptions={{ expand: true }}
-            rows={data?.tasks ?? []}
-            getRowId={(row) => row.task_id}
-            columns={
-              taskTableDef(
-                data,
-                handleOpenEditTaskModal,
-                deleteTask,
-                createOrEditTask
-              )?.columns as any[]
-            }
-            disableColumnSelector={true}
-          />
-        </Box>
-      </Box> */}
     </>
   ) : null
 }

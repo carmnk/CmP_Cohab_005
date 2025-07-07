@@ -4,7 +4,6 @@ import { mdiStar, mdiDotsVertical, mdiClose, mdiAccountKey } from '@mdi/js'
 import {
   Tooltip,
   Badge,
-  Avatar,
   useTheme,
   Box,
   ListItemIcon,
@@ -14,7 +13,6 @@ import {
   Typography,
 } from '@mui/material'
 import Icon from '@mdi/react'
-import { getUserInitials } from '../../utils/getUserInitials'
 import { Fragment } from 'react/jsx-runtime'
 import { useCallback, useRef, useState } from 'react'
 import { AppControllerData } from '../../appController/types/appControllerData'
@@ -31,13 +29,6 @@ export const usersTableDef = (params: UsersTableDefParams) => {
   const userGroup = data?.user?.groups?.[0]
   const groupMembers = userGroup?.group_members ?? []
 
-  console.log(
-    'usersTableDef',
-    data,
-    userGroup,
-    groupMembers,
-    getUserInitials(data?.user)
-  )
   return {
     data: groupMembers, //[{ column1: "ABCD", column2: "EFGH" }],
     columns: [

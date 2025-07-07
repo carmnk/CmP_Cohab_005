@@ -7,7 +7,6 @@ import {
   useMediaQuery,
   useTheme,
 } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
 import { Fragment, useCallback, useMemo, useState } from 'react'
 import { AppControllerData } from '../../appController/types/appControllerData'
 import { AppControllerDataChanges } from '../../appController/types/dataChanges'
@@ -19,15 +18,12 @@ export type UpdatesSectionProps = {
   start?: number
   end?: number
 }
-declare const BASE_URL: string
 
 export const UpdatesSection = (props: UpdatesSectionProps) => {
   const { data, dataChanges, start = 0, end = undefined } = props
   const { user_changes } = dataChanges
-  const groupMembers = data?.user?.groups?.[0]?.group_members ?? []
 
   const theme = useTheme()
-  const isMinSmViewport = useMediaQuery(theme.breakpoints.up('sm'))
   const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
 
   const [ui, setUi] = useState({ userChangeDialog: null as number | null })
@@ -38,17 +34,6 @@ export const UpdatesSection = (props: UpdatesSectionProps) => {
   const handleCloseUserChangeDialog = useCallback(() => {
     setUi((current) => ({ ...current, userChangeDialog: null }))
   }, [])
-
-  const navigateRaw = useNavigate()
-  const navigate = useCallback(
-    (to: string) => {
-      const toAdj = to.startsWith('/') ? to.slice(1) : to
-      const destination = BASE_URL + toAdj
-      console.log('navigate', to, 'toAdj', toAdj, 'destination', destination)
-      navigateRaw(destination)
-    },
-    [navigateRaw]
-  )
 
   const defaultChangesEndAdj = isMinMdViewport ? 5 : 3
 

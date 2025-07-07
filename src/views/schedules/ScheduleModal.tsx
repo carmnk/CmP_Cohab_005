@@ -2,6 +2,7 @@ import { CSelect2, CTextField, Modal } from '@cmk/fe_utils'
 import { Box } from '@mui/material'
 import { useCallback, useMemo, useState } from 'react'
 import { AppControllerData } from '../../appController/types/appControllerData'
+import toast from 'react-hot-toast'
 
 export type Schedule = {
   schedule_id?: number
@@ -88,7 +89,7 @@ export const ScheduleModal = (props: ScheduleModalProps) => {
       formDataAdj.user_id = data?.user?.user_id
     }
     if (!validateFormData(formDataAdj)) {
-      alert('Formdata incomplete')
+      toast.error('Formdata incomplete')
       return
     }
     if (formDataAdj?.due_datetime) {

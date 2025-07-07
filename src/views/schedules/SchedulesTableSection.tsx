@@ -1,5 +1,5 @@
 import { Box, Typography, useMediaQuery, useTheme } from '@mui/material'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import { Button, Flex } from '@cmk/fe_utils'
 import { mdiPlus } from '@mdi/js'
@@ -16,38 +16,43 @@ export type SchedulesTableSectionProps = {
 
 export const SchedulesTableSection = (props: SchedulesTableSectionProps) => {
   const { data, appController } = props
+  const { setUi, ui } = appController
   const actions = appController?.actions as AppControllerActions
 
   const theme = useTheme()
-  const isMinSmViewport = useMediaQuery(theme.breakpoints.up('sm'))
   const isMinMdViewport = useMediaQuery(theme.breakpoints.up('md'))
 
-  const [ui, setUi] = useState({
-    scheduleModal: null as number | true | null,
-    scheduleEntrysModal: null as number | null,
-  })
-
   const handleOpenNewScheduleModal = useCallback(() => {
-    setUi((prev) => ({ ...prev, scheduleModal: true }))
+    setUi((current) => ({ ...current, scheduleModal: true }))
   }, [setUi])
+
   const handleOpenEditScheduleModal = useCallback(
     (schedule_id) => {
-      setUi((prev) => ({ ...prev, scheduleModal: schedule_id }))
+      setUi((current) => ({
+        ...current,
+        scheduleModal: schedule_id,
+      }))
     },
     [setUi]
   )
   const handleCloseScheduleModal = useCallback(() => {
-    setUi((prev) => ({ ...prev, scheduleModal: null }))
+    setUi((current) => ({ ...current, scheduleModal: null }))
   }, [setUi])
 
   const handleOpenSchedulesEntrysModal = useCallback(
     (schedule_id: number) => {
-      setUi((prev) => ({ ...prev, scheduleEntrysModal: schedule_id }))
+      setUi((current) => ({
+        ...current,
+        scheduleEntryModal: schedule_id,
+      }))
     },
     [setUi]
   )
-  const handleCloseScheduleEntrysModal = useCallback(() => {
-    setUi((prev) => ({ ...prev, scheduleEntrysModal: null }))
+  const handleClosescheduleEntryModal = useCallback(() => {
+    setUi((current) => ({
+      ...current,
+      scheduleEntryModal: null,
+    }))
   }, [setUi])
 
   const tableDef = useMemo(() => {
@@ -123,24 +128,24 @@ export const SchedulesTableSection = (props: SchedulesTableSectionProps) => {
       {!!ui.scheduleModal && (
         <ScheduleModal
           schedule_id={
-            typeof ui.scheduleModal === 'number' ? ui.scheduleModal : undefined
+            typeof ui?.scheduleModal === 'number' ? ui.scheduleModal : undefined
           }
           data={data}
-          open={!!ui.scheduleModal}
+          open={!!ui?.scheduleModal}
           onClose={handleCloseScheduleModal}
           onConfirm={handleConfirm}
         />
       )}
-      {!!ui.scheduleEntrysModal && (
+      {!!ui.scheduleEntryModal && (
         <ScheduleEntrysCalendar
           schedule_id={
-            typeof ui.scheduleEntrysModal === 'number'
-              ? ui.scheduleEntrysModal
+            typeof ui.scheduleEntryModal === 'number'
+              ? ui.scheduleEntryModal
               : undefined
           }
           data={data}
-          open={!!ui.scheduleEntrysModal}
-          onClose={handleCloseScheduleEntrysModal}
+          open={!!ui.scheduleEntryModal}
+          onClose={handleClosescheduleEntryModal}
           createOrEditScheduleEntry={actions.createOrEditScheduleEntry}
           deleteScheduleEntry={actions.deleteScheduleEntry}
         />

@@ -4,7 +4,6 @@ import {
   mdiAccountGroup,
   mdiAccountPlus,
   mdiCalendarAlertOutline,
-  mdiCheck,
   mdiDelete,
   mdiDotsVertical,
   mdiPencil,
@@ -18,7 +17,6 @@ import {
   ListItemIcon,
   ListItemText,
   useTheme,
-  Badge,
   Box,
 } from '@mui/material'
 import { formatUserName } from '../../utils/formatUsername'
@@ -29,6 +27,7 @@ import { GridFilterOperator } from '@mui/x-data-grid'
 import { AppControllerData } from '../../appController/types/appControllerData'
 import { Task } from '../../appController/types/tasks'
 import { CAvatar } from '../../components/CAvatar'
+import toast from 'react-hot-toast'
 
 export const taskTableDef = (
   data: AppControllerData,
@@ -48,10 +47,10 @@ export const taskTableDef = (
     try {
       const resCreatcreateOrEditTask = await createOrEditTask(newFormData)
       console.log('Task status updated successfully:', resCreatcreateOrEditTask)
-      // alert(`Task status updated to ${newFormData.task_status}`)
+      toast.success('task status successfully changed')
     } catch (e) {
       console.error('Error updating task status:', e)
-      alert('Error updating task status')
+      toast.error('An error has occured')
     }
   }
 
@@ -63,14 +62,11 @@ export const taskTableDef = (
         if (!filterItem.field || !filterItem.operator) {
           return null
         }
-        console.log(
-          'getApplyFilterFn statusFilterOperators',
-          filterItem,
-          column
-        )
         return (value, row, column, apiRef) => {
           console.log(
             'getApplyFilterFn value',
+            filterItem,
+            column,
             value,
             row,
             column,
@@ -90,14 +86,11 @@ export const taskTableDef = (
         if (!filterItem.field || !filterItem.operator) {
           return null
         }
-        console.log(
-          'getApplyFilterFn statusFilterOperators',
-          filterItem,
-          column
-        )
         return (value, row, column, apiRef) => {
           console.log(
             'getApplyFilterFn value',
+            filterItem,
+            column,
             value,
             row,
             column,

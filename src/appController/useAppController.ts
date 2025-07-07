@@ -18,6 +18,7 @@ export const useAppController = () => {
     initialized: false,
     tasksModal: null,
     scheduleModal: null,
+    scheduleEntryModal: null,
     drawerOpen: false,
   })
 

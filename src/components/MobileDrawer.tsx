@@ -7,7 +7,6 @@ import {
   mdiClose,
 } from '@mdi/js'
 import {
-  SwipeableDrawer,
   Typography,
   Box,
   Divider,
@@ -33,7 +32,6 @@ declare const BASE_URL: string
 
 export const MobileDrawer = (props: MobileDrawerProps) => {
   const { data, actions, userImage, ui } = props
-  //   const { user } = data
   const { toggleDrawerOpen } = actions
   const navigate = useNavigate()
   const theme = useTheme()
