@@ -32,7 +32,7 @@ export const UserImageComponent = (props: UserImageProps) => {
         width={32}
         height={32}
         overflow={'hidden'}
-        border={'3px solid ' + user?.user_color}
+        // border={'3px solid ' + user?.user_color}
         onClick={toggleDrawerOpen}
         sx={pointerCursor}
       >

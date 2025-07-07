@@ -85,10 +85,10 @@ export const DesktopDrawer = (props: DesktopDrawerProps) => {
         ) : (
           <CAvatar
             sx={{
-              width: 'calc(4rem - 10px)',
-              height: 'calc(4rem - 10px)',
+              width: 'calc(2.5rem - 10px)',
+              height: 'calc(2.5rem - 10px)',
               // background: user?.user_color,
-              fontSize: '2rem',
+              fontSize: '1.25rem',
             }}
             user={data?.user}
           />

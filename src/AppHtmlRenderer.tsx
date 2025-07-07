@@ -299,33 +299,33 @@ export const AppHtmlRenderer = (props: AppHtmlRendererProps) => {
     actions,
   ])
 
-  useEffect(() => {
-    if (data?.user?.photo_url) {
-      if (!userImage) {
-        const getUserImage = async () => {
-          try {
-            const imgResponse = await query(QUERY_METHOD.GET_FILE, {
-              url: data?.user?.photo_url as string,
-            })
+  // useEffect(() => {
+  //   if (data?.user?.photo_url) {
+  //     if (!userImage) {
+  //       const getUserImage = async () => {
+  //         try {
+  //           const imgResponse = await query(QUERY_METHOD.GET_FILE, {
+  //             url: data?.user?.photo_url as string,
+  //           })
 
-            const imageDataIn = imgResponse?.data
-            const reader = new FileReader()
-            reader.onload = function (e) {
-              const src = e?.target?.result
-              setUserImage(src as any)
-            }
-            reader.readAsDataURL(imageDataIn as any)
-          } catch (e) {
-            console.error('Error fetching user image', e)
-            // setUserImage(null);
-          }
-        }
-        getUserImage()
-      }
-    } else {
-      setUserImage(null)
-    }
-  }, [data?.user?.photo_url])
+  //           const imageDataIn = imgResponse?.data
+  //           const reader = new FileReader()
+  //           reader.onload = function (e) {
+  //             const src = e?.target?.result
+  //             setUserImage(src as any)
+  //           }
+  //           reader.readAsDataURL(imageDataIn as any)
+  //         } catch (e) {
+  //           console.error('Error fetching user image', e)
+  //           // setUserImage(null);
+  //         }
+  //       }
+  //       getUserImage()
+  //     }
+  //   } else {
+  //     setUserImage(null)
+  //   }
+  // }, [data?.user?.photo_url])
 
   useEffect(() => {
     getSchedules()
