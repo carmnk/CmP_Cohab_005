@@ -12,7 +12,7 @@ export type CAvatarProps = AvatarProps & {
 export const CAvatar = (props: CAvatarProps) => {
   const { user, size = 30, ...rest } = props
   const userColor = user?.user_color
-  const contrastRatio = getContrastRatio('#ffffff', userColor as string)
+  const contrastRatio = userColor && getContrastRatio('#ffffff', userColor as string)
 
   return (
     <Avatar
